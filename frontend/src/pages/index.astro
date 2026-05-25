@@ -1,0 +1,136 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="خانه — دستیار جلسه">
+  <h1>دستیار جلسه سازمانی</h1>
+  <p class="muted">transcript فارسی را تحلیل کنید — خلاصه، تسک، RAG و Jira</p>
+
+  <div id="health" class="alert alert-info hidden"></div>
+  <div id="error" class="alert alert-error hidden"></div>
+
+  <section class="card">
+    <h2>جلسات نمونه (مصنوعی)</h2>
+    <p class="muted">برای دمو سریع، یکی از جلسات آماده را پردازش کنید.</p>
+    <div id="synthetic-list" class="grid grid-2"></div>
+  </section>
+
+  <section class="card">
+    <h2>transcript جدید</h2>
+    <p class="muted">فرمت: <code dir="ltr">[۱۴:۰۲] نام: متن</code></p>
+    <form id="upload-form">
+      <label for="title">عنوان (اختیاری)</label>
+      <input id="title" name="title" type="text" placeholder="مثلاً استنداپ دوشنبه" />
+      <label for="transcript" style="margin-top: 0.75rem; display: block;">متن جلسه</label>
+      <textarea id="transcript" name="transcript" placeholder="[۰۹:۰۰] علی: ..."></textarea>
+      <label style="margin-top: 0.75rem; display: block;">
+        <input type="file" id="file-input" accept=".txt,.vtt,.srt" />
+        آپلود فایل متنی
+      </label>
+      <button class="btn" type="submit" style="margin-top: 1rem;">تحلیل جلسه</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>جلسات اخیر</h2>
+    <div id="meetings-list"></div>
+  </section>
+</Layout>
+
+<script>
+  import { api } from '../lib/api';
+
+  const errorEl = document.getElementById('error')!;
+  const healthEl = document.getElementById('health')!;
+  const syntheticList = document.getElementById('synthetic-list')!;
+  const meetingsList = document.getElementById('meetings-list')!;
+
+  function showError(msg: string) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
+
+  async function loadHealth() {
+    try {
+      const h = await api.health();
+      healthEl.textContent = h.google_api
+        ? '✓ Google API متصل است' + (h.jira_configured ? ' · ✓ Jira پیکربندی شده' : ' · ⚠ Jira ناقص')
+        : '⚠ GOOGLE_API_KEY در .env تنظیم نشده';
+      healthEl.classList.remove('hidden');
+    } catch {
+      healthEl.textContent = '⚠ backend در http://127.0.0.1:8000 در دسترس نیست';
+      healthEl.classList.remove('hidden');
+    }
+  }
+
+  async function loadSynthetic() {
+    try {
+      const items = await api.listSynthetic();
+      syntheticList.innerHTML = items
+        .map(
+          (item) => `
+        <div class="card" style="margin:0">
+          <strong>${item.title}</strong>
+          <p class="muted">${item.filename}</p>
+          <button class="btn btn-process" data-id="${item.id}">پردازش</button>
+        </div>`
+        )
+        .join('');
+      syntheticList.querySelectorAll('.btn-process').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = (btn as HTMLButtonElement).dataset.id!;
+          btn.setAttribute('disabled', 'true');
+          try {
+            const meeting = await api.createFromSynthetic(id);
+            window.location.href = `/meeting/${meeting.id}`;
+          } catch (e) {
+            showError(String(e));
+            btn.removeAttribute('disabled');
+          }
+        });
+      });
+    } catch (e) {
+      showError(String(e));
+    }
+  }
+
+  async function loadMeetings() {
+    try {
+      const meetings = await api.listMeetings();
+      if (!meetings.length) {
+        meetingsList.innerHTML = '<p class="muted">هنوز جلسه‌ای ثبت نشده.</p>';
+        return;
+      }
+      meetingsList.innerHTML = `<ul>${meetings
+        .map(
+          (m) =>
+            `<li><a href="/meeting/${m.id}">${m.title}</a> <span class="muted">${new Date(m.created_at).toLocaleString('fa-IR')}</span></li>`
+        )
+        .join('')}</ul>`;
+    } catch (e) {
+      showError(String(e));
+    }
+  }
+
+  document.getElementById('file-input')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    (document.getElementById('transcript') as HTMLTextAreaElement).value = text;
+  });
+
+  document.getElementById('upload-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const transcript = (document.getElementById('transcript') as HTMLTextAreaElement).value;
+    const title = (document.getElementById('title') as HTMLInputElement).value;
+    try {
+      const meeting = await api.createMeeting(transcript, title || undefined);
+      window.location.href = `/meeting/${meeting.id}`;
+    } catch (err) {
+      showError(String(err));
+    }
+  });
+
+  loadHealth();
+  loadSynthetic();
+  loadMeetings();
+</script>

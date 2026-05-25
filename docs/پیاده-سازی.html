@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>پیاده‌سازی — دستیار جلسه سازمانی MVP</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <style>
+    :root { --text: #1a1a1a; --muted: #555; --border: #ddd; --bg: #fafafa; --accent: #059669; }
+    body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.85; color: var(--text); max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    h1 { font-size: 1.75rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.35rem; margin-top: 2.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: right; }
+    th { background: var(--bg); }
+    code, pre, .ltr, .mermaid-wrap { direction: ltr; text-align: left; unicode-bidi: embed; }
+    code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
+    pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .mermaid-wrap { margin: 1.5rem 0; padding: 1rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+    .note { background: #ecfdf5; border-right: 4px solid var(--accent); padding: 1rem; margin: 1rem 0; }
+    .cut { background: #fef2f2; border-right: 4px solid #dc2626; padding: 1rem; margin: 1rem 0; }
+    .future { background: #fefce8; border-right: 4px solid #ca8a04; padding: 1rem; margin: 1rem 0; }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+
+<h1>پیاده‌سازی — دستیار جلسه سازمانی (MVP)</h1>
+<p class="meta">نسخه واقع‌بینانه · به‌روزرسانی ۱۴۰۵/۰۳/۰۵ · جایگزین <code>پیاده‌سازی.docx</code></p>
+
+<h2>۱. هدف سامانه</h2>
+<p>
+  تبدیل transcript جلسات فارسی به خروجی عملیاتی: <strong>خلاصه</strong>، <strong>تسک</strong>، <strong>پرسش‌وپاسخ RAG</strong>، و <strong>ثبت در Jira</strong>.
+</p>
+
+<h2>۲. MVP در برابر نسخه کامل (YAGNI)</h2>
+<table>
+  <tr><th>قابلیت</th><th>نسخه کامل (سند اولیه)</th><th>MVP فعلی</th></tr>
+  <tr><td>ورودی</td><td>ضبط صوت زنده + STT</td><td>✅ transcript آماده (paste + upload)</td></tr>
+  <tr><td>تحلیل</td><td>GPT-4 / مدل‌های متنوع</td><td>✅ Gemini Flash + Pydantic AI</td></tr>
+  <tr><td>جستجو</td><td>ElasticSearch</td><td>✅ Vector store JSON محلی</td></tr>
+  <tr><td>تسک</td><td>Jira + Trello + Asana + …</td><td>✅ فقط Jira (<span dir="ltr">KAN</span>)</td></tr>
+  <tr><td>RAG</td><td>آرشیو سازمان</td><td>✅ تک‌جلسه · ⏳ چندجلسه sprint 2</td></tr>
+  <tr><td>تقویم / Teams</td><td>ادغام کامل</td><td>❌ sprint بعد</td></tr>
+  <tr><td>داشبورد / اعلان</td><td>گزارش هفتگی</td><td>❌ sprint بعد</td></tr>
+</table>
+
+<h2>۳. جریان داده End-to-End</h2>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as کاربر
+    participant UI as Astro RTL
+    participant API as FastAPI
+    participant AA as analysis_agent
+    participant RA as rag_agent
+    participant V as Vector Store
+    participant J as Jira KAN
+
+    U->>UI: transcript / جلسه نمونه
+    UI->>API: POST /api/meetings
+    API->>API: parse + chunk + embed
+    API->>V: ذخیره vectors
+    API->>AA: run(transcript)
+    AA-->>UI: خلاصه + تسک‌ها
+    U->>UI: سوال RAG
+    UI->>API: POST /ask
+    API->>RA: run + search_chunks tool
+    RA->>V: similarity
+    RA-->>UI: پاسخ + citation
+    U->>UI: تأیید تسک
+    UI->>API: POST /jira/create
+    API->>J: issue جدید
+</pre>
+</div>
+
+<h2>۴. Pydantic AI — Agents و Tools</h2>
+
+<h3>۴.۱ analysis_agent</h3>
+<pre><code>from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class MeetingAnalysis(BaseModel):
+    title: str
+    summary: str
+    key_points: list[str]
+    decisions: list[str]
+    tasks: list[MeetingTask]
+
+analysis_agent = Agent(
+    'google:gemini-2.5-flash',
+    output_type=MeetingAnalysis,
+    system_prompt='تحلیل transcript جلسه فارسی. فقط بر اساس متن.',
+)</code></pre>
+
+<h3>۴.۲ rag_agent</h3>
+<pre><code>rag_agent = Agent(
+    'google:gemini-2.5-flash',
+    output_type=RagAnswer,
+    deps_type=MeetingDeps,
+)
+
+@rag_agent.tool
+async def search_meeting_chunks(ctx, query: str, top_k: int = 5) -> list[str]:
+    return ctx.deps.vector_store.search(ctx.deps.meeting_id, query, top_k)</code></pre>
+
+<div class="note">
+  Jira create از API route مستقیم است (نه agent) — رفتار predictable برای دمو و خطای کمتر.
+</div>
+
+<h2>۵. صفحات UI (Astro)</h2>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TB
+    subgraph pages ["صفحات — RTL"]
+        home["/ خانه"]
+        meeting["/meeting/id"]
+        settings["/settings"]
+    end
+    subgraph tabs ["تب‌های جلسه"]
+        tab1["خلاصه و تصمیمات"]
+        tab2["تسک‌ها + Jira"]
+        tab3["پرسش از جلسه"]
+    end
+    home --> meeting
+    meeting --> tabs
+</pre>
+</div>
+
+<p><strong>قواعد RTL/LTR:</strong></p>
+<ul>
+  <li><code>html lang="fa" dir="rtl"</code> — متن فارسی راست‌چین</li>
+  <li>کد، env، URL، نام API در <code>dir="ltr"</code></li>
+  <li>نمودارهای Mermaid در wrapper با <code>direction: ltr</code></li>
+</ul>
+
+<h2>۶. API Endpoints</h2>
+<table>
+  <tr><th>Method</th><th>Path</th><th>توضیح</th></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings</td><td>لیست جلسات</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings</td><td>ingest + analysis_agent</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/ask</td><td>rag_agent</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/preview</td><td>پیش‌نمایش issue</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/create</td><td>ایجاد در Jira</td></tr>
+</table>
+
+<h2>۷. داده مصنوعی</h2>
+<table>
+  <tr><th>فایل</th><th>موضوع</th></tr>
+  <tr><td dir="ltr">meeting-01-scrum.txt</td><td>استنداپ هفتگی</td></tr>
+  <tr><td dir="ltr">meeting-02-planning.txt</td><td>برنامه‌ریزی MVP</td></tr>
+  <tr><td dir="ltr">meeting-03-review.txt</td><td>بازبینی sprint</td></tr>
+</table>
+<p>فرمت: <code dir="ltr">[۱۴:۰۲] علی: متن گفتار</code></p>
+
+<h2>۸. تنظیمات محیط (.env)</h2>
+<pre><code>GOOGLE_API_KEY=...
+JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
+JIRA_PROJECT_KEY=KAN
+JIRA_EMAIL=your@email.com
+JIRA_API_TOKEN=...</code></pre>
+
+<h2>۹. ساختار پروژه</h2>
+<pre><code>project/
+├── frontend/          # Astro — UI فارسی
+├── backend/
+│   ├── main.py
+│   ├── agents/        # Pydantic AI
+│   ├── services/      # embed, jira, parser
+│   └── models/
+├── data/synthetic/
+├── data/meetings/
+├── data/vectors/
+└── docs/</code></pre>
+
+<h2>۱۰. مدیریت خطا</h2>
+<table>
+  <tr><th>خطا</th><th>رفتار</th></tr>
+  <tr><td>Gemini timeout</td><td>retry ×1 + پیام فارسی</td></tr>
+  <tr><td>Transcript بدون speaker</td><td>برچسب [ناشناس]</td></tr>
+  <tr><td>Jira 401</td><td>راهنمای بررسی .env</td></tr>
+  <tr><td>RAG بدون match</td><td>«در این جلسه یافت نشد»</td></tr>
+</table>
+
+<div class="future">
+  <strong>Sprint 2+:</strong> RAG چندجلسه · map assignee به Jira user · OAuth · STT · ElasticSearch یا pgvector
+</div>
+
+</body>
+</html>

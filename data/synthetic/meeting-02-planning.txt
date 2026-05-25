@@ -1,0 +1,8 @@
+[۱۴:۰۰] مریم (مدیر محصول): هدف MVP دستیار جلسه است: transcript بگیرد، خلاصه بدهد، تسک استخراج کند، RAG داشته باشد.
+[۱۴:۰۳] امیر (توسعه): frontend با Astro فارسی RTL. backend با FastAPI و Pydantic AI.
+[۱۴:۰۶] نازنین (QA): برای دمو سه جلسه مصنوعی فارسی کافی است. سناریوی تست: upload، سوال RAG، ارسال Jira.
+[۱۴:۰۹] مریم: Gemini Flash برای LLM و text-embedding-004 برای RAG. LangChain نمی‌خواهیم — سبک باشد.
+[۱۴:۱۲] امیر: vector store فعلاً JSON محلی. sprint بعد pgvector یا آرشیو چندجلسه.
+[۱۴:۱۵] مریم: تصمیم: Jira واقعی روی پروژه KAN. preview قبل از create الزامی است.
+[۱۴:۱۸] نازنین: assignee در MVP فقط در description issue — map به user Jira sprint بعد.
+[۱۴:۲۰] امیر: تا جمعه prototype اولیه آماده می‌کنم. نازنین از شنبه تست می‌کند.

@@ -1,0 +1,9 @@
+[۱۱:۰۰] حسین: sprint گذشته velocity ما ۲۱ point بود. دو story ناتمام ماند.
+[۱۱:۰۲] فاطمه: story مربوط به RAG citation هنوز open است — گاهی منبع اشتباه نشان می‌دهد.
+[۱۱:۰۵] حسین: root cause: chunk size بزرگ بود. کوچک‌تر کردیم به ۳ turn.
+[۱۱:۰۸] کامبیز: Jira integration کار کرد. سه issue در KAN ساخته شد. link در description خوب است.
+[۱۱:۱۱] فاطمه: پیشنهاد می‌کنم health endpoint برای چک env اضافه کنیم.
+[۱۱:۱۳] حسین: موافقم. همچنین retry برای Gemini timeout.
+[۱۱:۱۵] کامبیز: demo برای استاد هفته آینده — اسلاید لازم نیست، همین HTML docs کافی است.
+[۱۱:۱۸] فاطمه: من تا سه‌شنبه bug citation را fix می‌کنم. deadline demo: جمعه.
+[۱۱:۲۰] حسین: تصمیم: اولویت bug RAG، بعد polish UI فارسی.

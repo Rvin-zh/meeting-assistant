@@ -1,0 +1,215 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const backendUrl = import.meta.env.PUBLIC_BACKEND_URL ?? 'http://127.0.0.1:8000';
+
+let meeting: Record<string, unknown> | null = null;
+let loadError: string | null = null;
+
+if (!id) {
+  loadError = 'شناسه جلسه نامعتبر است';
+} else {
+  try {
+    const res = await fetch(`${backendUrl}/api/meetings/${id}`);
+    if (res.ok) {
+      meeting = await res.json();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      loadError = (err as { detail?: string }).detail ?? 'جلسه یافت نشد';
+    }
+  } catch {
+    loadError = 'backend در دسترس نیست — ابتدا ./scripts/run-backend.sh را اجرا کنید';
+  }
+}
+
+const analysis = meeting?.analysis as {
+  summary: string;
+  key_points: string[];
+  decisions: string[];
+  tasks: { title: string; assignee?: string; deadline?: string; priority: string }[];
+} | undefined;
+---
+
+<Layout title="جلسه — دستیار جلسه">
+  {loadError && (
+    <div class="card alert alert-error">
+      <p>{loadError}</p>
+      <p style="margin-top:0.75rem"><a href="/">بازگشت به خانه</a></p>
+    </div>
+  )}
+
+  {meeting && (
+    <div id="meeting-app" data-meeting-id={meeting.id as string}>
+      <h1>{meeting.title as string}</h1>
+      <p class="muted">شناسه: {meeting.id as string} · منبع: {meeting.source as string}</p>
+
+      <div id="error" class="alert alert-error hidden"></div>
+      <div id="success" class="alert alert-success hidden"></div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="summary" type="button">خلاصه</button>
+        <button class="tab" data-tab="tasks" type="button">تسک‌ها</button>
+        <button class="tab" data-tab="rag" type="button">پرسش از جلسه</button>
+      </div>
+
+      <section id="panel-summary" class="card tab-panel">
+        <h2>خلاصه</h2>
+        <p id="summary-text">{analysis?.summary}</p>
+        <h2 style="margin-top:1rem">نکات کلیدی</h2>
+        <ul>
+          {analysis?.key_points?.length
+            ? analysis.key_points.map((p) => <li>{p}</li>)
+            : <li class="muted">—</li>}
+        </ul>
+        <h2>تصمیمات</h2>
+        <ul>
+          {analysis?.decisions?.length
+            ? analysis.decisions.map((d) => <li>{d}</li>)
+            : <li class="muted">—</li>}
+        </ul>
+      </section>
+
+      <section id="panel-tasks" class="card tab-panel hidden">
+        <h2>تسک‌های استخراج‌شده</h2>
+        {analysis?.tasks?.length ? (
+          <table>
+            <thead>
+              <tr><th>عنوان</th><th>مسئول</th><th>مهلت</th><th>اولویت</th></tr>
+            </thead>
+            <tbody>
+              {analysis.tasks.map((t) => (
+                <tr>
+                  <td>{t.title}</td>
+                  <td>{t.assignee ?? '—'}</td>
+                  <td>{t.deadline ?? '—'}</td>
+                  <td><span class="badge">{t.priority}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p class="muted">تسکی استخراج نشد.</p>
+        )}
+        <p class="muted" style="margin-top:0.5rem">تسک‌ها در Jira به انگلیسی ثبت می‌شوند (خواناتر در رابط LTR).</p>
+        <div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn btn-outline" id="btn-preview" type="button">پیش‌نمایش Jira (English)</button>
+          <button class="btn" id="btn-jira" type="button">ارسال به Jira</button>
+        </div>
+        <pre id="jira-preview" class="ltr hidden" style="margin-top:1rem; background:#f1f5f9; padding:1rem; border-radius:8px; overflow:auto;"></pre>
+      </section>
+
+      <section id="panel-rag" class="card tab-panel hidden">
+        <h2>پرسش از جلسه (RAG)</h2>
+        <p class="muted">سوال درباره محتوای جلسه بپرسید. سلام و احوال‌پرسی بدون نمایش transcript پاسخ داده می‌شود.</p>
+        <div id="chat" class="chat-box"></div>
+        <form id="ask-form" style="margin-top:1rem; display:flex; gap:0.5rem;">
+          <input id="question" type="text" placeholder="مثلاً: deadline release چیست؟" />
+          <button class="btn" type="submit">بپرس</button>
+        </form>
+      </section>
+    </div>
+  )}
+</Layout>
+
+<script>
+  const app = document.getElementById('meeting-app');
+  if (!app) {
+    // error state only — nothing to wire up
+  } else {
+    const meetingId = app.dataset.meetingId;
+    const errorEl = document.getElementById('error');
+    const successEl = document.getElementById('success');
+
+    function showError(msg) {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.classList.remove('hidden');
+    }
+
+    function showSuccess(msg) {
+      if (!successEl) return;
+      successEl.textContent = msg;
+      successEl.classList.remove('hidden');
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach((t) => {
+        t.classList.toggle('active', t.dataset.tab === name);
+      });
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.add('hidden'));
+      document.getElementById(`panel-${name}`)?.classList.remove('hidden');
+    }
+
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab ?? 'summary'));
+    });
+
+    async function apiPost(path, body) {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail ?? 'خطای سرور');
+      }
+      return res.json();
+    }
+
+    document.getElementById('btn-preview')?.addEventListener('click', async () => {
+      try {
+        const preview = await apiPost(`/api/meetings/${meetingId}/jira/preview`, {});
+        const pre = document.getElementById('jira-preview');
+        if (pre) {
+          pre.textContent = JSON.stringify(preview.issues, null, 2);
+          pre.classList.remove('hidden');
+        }
+      } catch (e) {
+        showError(String(e));
+      }
+    });
+
+    document.getElementById('btn-jira')?.addEventListener('click', async () => {
+      try {
+        const result = await apiPost(`/api/meetings/${meetingId}/jira/create`, {});
+        showSuccess(`ایجاد شد: ${result.created.map((c) => c.key).join(', ')}`);
+      } catch (e) {
+        showError(String(e));
+      }
+    });
+
+    document.getElementById('ask-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('question');
+      const q = input?.value.trim();
+      if (!q) return;
+      const chat = document.getElementById('chat');
+      if (chat) chat.innerHTML += `<div class="chat-msg"><strong>شما:</strong> ${q}</div>`;
+      if (input) input.value = '';
+      try {
+        const ans = await apiPost(`/api/meetings/${meetingId}/ask`, { question: q });
+        let footnotes = '';
+        if (ans.used_meeting_context && ans.sources?.length) {
+          const cites = ans.sources
+            .map((s) => {
+              const quote = s.excerpt || s.text || '';
+              return quote
+                ? `<span class="cite-item"><strong>${s.speaker}</strong>: ${quote}</span>`
+                : `<span class="cite-item"><strong>${s.speaker}</strong></span>`;
+            })
+            .join('');
+          footnotes = `<div class="cite-footnotes">منابع: ${cites}</div>`;
+        }
+        if (chat) {
+          chat.innerHTML += `<div class="chat-msg assistant"><strong>دستیار:</strong><p>${ans.answer}</p>${footnotes}</div>`;
+        }
+      } catch (err) {
+        if (chat) chat.innerHTML += `<div class="chat-msg alert-error">${err}</div>`;
+      }
+    });
+  }
+</script>

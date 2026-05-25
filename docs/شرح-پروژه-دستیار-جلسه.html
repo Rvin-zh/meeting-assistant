@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>شرح پروژه — دستیار جلسه (AI-native MVP)</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <style>
+    :root { --text: #1a1a1a; --muted: #555; --border: #ddd; --bg: #fafafa; --accent: #7c3aed; }
+    body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.85; color: var(--text); max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    h1 { font-size: 1.75rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.35rem; margin-top: 2.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: right; }
+    th { background: var(--bg); }
+    code, pre, .ltr, .mermaid-wrap { direction: ltr; text-align: left; unicode-bidi: embed; }
+    code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .mermaid-wrap { margin: 1.5rem 0; padding: 1rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+    .note { background: #f5f3ff; border-right: 4px solid var(--accent); padding: 1rem; margin: 1rem 0; }
+    .future { background: #fefce8; border-right: 4px solid #ca8a04; padding: 1rem; margin: 1rem 0; }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+
+<h1>شرح پروژه — دستیار جلسه (محصول AI-native)</h1>
+<p class="meta">MVP دوره طراحی محصولات AI-native · جایگزین <code>شرح پروژه- دستیار جلسه.docx</code></p>
+
+<h2>۱. ایده محصول</h2>
+<p>
+  <strong>دستیار جلسه سازمانی</strong> — MVP از هسته LLM سازمانی که transcript جلسه را به دانش قابل جستجو و اقدام عملیاتی (Jira) تبدیل می‌کند.
+</p>
+
+<h2>۲. مسئله و ارزش</h2>
+<ul>
+  <li>جلسات بدون صورتجلسه دقیق → اتلاف وقت و فراموشی تصمیمات</li>
+  <li>تسک‌های دستی و پراکنده → گم شدن مسئولیت‌ها</li>
+  <li>عدم جستجو در محتوای جلسات → از دست رفتن context</li>
+</ul>
+<p><strong>ارزش MVP:</strong> یک جریان end-to-end از transcript تا Jira + RAG، قابل دمو در چند دقیقه.</p>
+
+<h2>۳. RAG در این پروژه</h2>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart LR
+    T["Transcript"] --> C["Chunk<br/>۳–۵ turn"]
+    C --> E["text-embedding-004"]
+    E --> V["Vector JSON"]
+    Q["سوال کاربر"] --> EQ["Embed سوال"]
+    EQ --> S["Top-K similarity"]
+    S --> CTX["Context chunks"]
+    CTX --> AG["rag_agent<br/>Pydantic AI"]
+    AG --> A["پاسخ + citation"]
+</pre>
+</div>
+
+<table>
+  <tr><th>مرحله</th><th>MVP (Sprint 1)</th><th>آینده</th></tr>
+  <tr><td>دامنه جستجو</td><td>یک جلسه</td><td>آرشیو چندجلسه + فیلتر پروژه</td></tr>
+  <tr><td>Vector DB</td><td>JSON محلی</td><td>pgvector / Vertex AI Vector Search</td></tr>
+  <tr><td>Chunking</td><td>بر اساس turn گفتگو</td><td>semantic + overlap</td></tr>
+</table>
+
+<h2>۴. Agentic AI با Pydantic AI</h2>
+<p>
+  به‌جای LangChain سنگین، از <strong>Pydantic AI</strong> به‌عنوان فریمورک agentic سبک استفاده می‌شود:
+</p>
+<ul>
+  <li><strong>Typed output:</strong> مدل‌های Pydantic برای خلاصه و تسک — validation خودکار</li>
+  <li><strong>Tools:</strong> <code>search_meeting_chunks</code> برای RAG</li>
+  <li><strong>Gemini native:</strong> <span dir="ltr">Agent('google:gemini-2.5-flash')</span></li>
+  <li><strong>قابل گسترش:</strong> agent Jira، multi-agent debate در sprint بعد</li>
+</ul>
+
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TB
+    subgraph agents ["Agents — Sprint 1"]
+        A1["analysis_agent"]
+        A2["rag_agent + tool"]
+    end
+    subgraph future ["Agents — Sprint 3+"]
+        A3["jira_agent"]
+        A4["orchestrator"]
+    end
+    A1 --> A2
+    A2 -.-> A3
+    A3 -.-> A4
+</pre>
+</div>
+
+<h2>۵. جریان MVP (ایده تا دمو)</h2>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TD
+    I1["۱. ایده: دستیار جلسه"]
+    I2["۲. MVP: transcript + RAG + Jira"]
+    I3["۳. داده مصنوعی فارسی"]
+    I4["۴. FastAPI + Pydantic AI"]
+    I5["۵. Astro UI RTL"]
+    I6["۶. دمو + Jira KAN"]
+
+    I1 --> I2 --> I3 --> I4 --> I5 --> I6
+</pre>
+</div>
+
+<h2>۶. Feature Engineering (ساده برای MVP)</h2>
+<table>
+  <tr><th>Feature</th><th>منبع</th><th>کاربرد</th></tr>
+  <tr><td>speaker</td><td>parse transcript</td><td>citation RAG + assignee hint</td></tr>
+  <tr><td>timestamp</td><td>parse [HH:MM]</td><td>ترتیب زمانی chunk</td></tr>
+  <tr><td>turn_count</td><td>chunk metadata</td><td>context size</td></tr>
+  <tr><td>embedding</td><td>Google API</td><td>similarity search</td></tr>
+</table>
+
+<h2>۷. تست A/B فرضی (برای گزارش دوره)</h2>
+<table>
+  <tr><th>نسخه</th><th>تغییر</th><th>فرضیه</th></tr>
+  <tr><td>A (کنترل)</td><td>خلاصه + تسک بدون RAG در UI</td><td>baseline</td></tr>
+  <tr><td>B (تreatment)</td><td>تب RAG فعال</td><td>رضایت بالاتر در یافتن تصمیمات</td></tr>
+</table>
+<p><strong>معیار موفقیت:</strong> زمان یافتن پاسخ · دقت citation · نرخ ارسال تسک به Jira</p>
+
+<h2>۸. MLOps / AIOps — فاز بعد (در MVP پیاده نمی‌شود)</h2>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart LR
+    D["داده جدید"] --> T["بازآموزی / prompt tune"]
+    T --> DEP["استقرار"]
+    DEP --> MON["پایش کیفیت"]
+    MON --> D
+</pre>
+</div>
+<div class="future">
+  CI/CD مدل · MLflow · پایش drift · Agentic auto-update — برای محصول سازمانی واقعی (گزینه B قبلی) در sprintهای ۴–۵.
+</div>
+
+<h2>۹. منابع</h2>
+<ul>
+  <li><a href="https://ai.pydantic.dev/" dir="ltr">Pydantic AI Documentation</a></li>
+  <li><a href="https://ai.google.dev/" dir="ltr">Google AI — Gemini & Embeddings</a></li>
+  <li><a href="https://support.atlassian.com/jira-software-cloud/docs/use-the-jira-rest-api/" dir="ltr">Jira REST API</a></li>
+  <li>Brown et al. — Language Models are Few-Shot Learners</li>
+  <li>OpenAI — Retrieval-Augmented Generation (مفهوم RAG)</li>
+</ul>
+
+<h2>۱۰. تکلیف دوره — تحویل MVP</h2>
+<div class="note">
+  <strong>تحویل‌ها:</strong>
+  <ol>
+    <li>اپ دمو (Astro + FastAPI + Pydantic AI)</li>
+    <li>۳ جلسه مصنوعی فارسی</li>
+    <li>این ۳ سند HTML + spec در <code dir="ltr">docs/superpowers/specs/</code></li>
+    <li>دمو زنده: خلاصه · RAG · ایجاد issue در Jira</li>
+  </ol>
+</div>
+
+<h2>۱۱. مدل‌های AI</h2>
+<table>
+  <tr><th>کاربرد</th><th>مدل</th></tr>
+  <tr><td>تحلیل + RAG generation</td><td dir="ltr">google:gemini-2.5-flash</td></tr>
+  <tr><td>Embedding</td><td dir="ltr">text-embedding-004</td></tr>
+</table>
+<p>در صورت نیاز می‌توان به <span dir="ltr">gemini-3-flash-preview</span> ارتقا داد — API یکسان است.</p>
+
+</body>
+</html>

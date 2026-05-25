@@ -1,0 +1,31 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = 'دستیار جلسه' } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand">دستیار جلسه</a>
+      <nav>
+        <a href="/">خانه</a>
+        <a href="/settings">تنظیمات</a>
+      </nav>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+  </body>
+</html>
