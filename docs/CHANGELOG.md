@@ -4,6 +4,8 @@
 
 | تاریخ | تغییر |
 |--------|--------|
+| ۱۴۰۵/۰۳/۰۶ | **نقشه اسپرینت:** `docs/نقشه-اسپرینت‌ها.html` + `future-sprints-roadmap.md` (بدون STT) |
+| ۱۴۰۵/۰۳/۰۶ | **تست‌ها:** `test_database`, `test_api_sqlite`, `test_live_api` (HTTP + Gemini/Jira)؛ `run-all-tests.sh` |
 | ۱۴۰۵/۰۳/۰۶ | **SQLite:** جلسات و خلاصه‌ها در `data/meetings.db` (مهاجرت خودکار از `data/meetings/*.json`) |
 | ۱۴۰۵/۰۳/۰۶ | **ChromaDB** جایگزین JSON دستی + cosine در Python (`data/chroma/`) |
 | ۱۴۰۵/۰۳/۰۶ | **RAG هوشمند:** سلام/احوال‌پرسی بدون بازیابی transcript؛ پاسخ طبیعی + footnote کوتاه (نه dump متن خام) |
@@ -13,7 +15,7 @@
 | ۱۴۰۵/۰۳/۰۶ | **مستندات:** هم‌خوان‌سازی ۳ HTML + design spec + README با Chroma/RAG/Jira EN |
 | ۱۴۰۵/۰۳/۰۶ | Embedding: `gemini-embedding-001` |
 | ۱۴۰۵/۰۳/۰۵ | MVP اولیه: FastAPI + Pydantic AI + Astro RTL + Jira KAN |
-| ۱۴۰۵/۰۳/۰۵ | ۹۳ تست واحد + ۸ تست live API |
+| ۱۴۰۵/۰۳/۰۵ | ۹۷ تست واحد + ۱۲ تست live API |
 | ۱۴۰۵/۰۳/۰۵ | انتشار GitHub: `Rvin-zh/meeting-assistant` |
 
 ## اسناد مرتبط (همیشه هم‌خوان کنید)

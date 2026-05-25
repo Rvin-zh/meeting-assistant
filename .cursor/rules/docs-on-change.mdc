@@ -20,4 +20,4 @@ When you change backend, frontend, agents, vector store, Jira, or env:
 
 Do not leave outdated references (e.g. `data/vectors/`, `text-embedding-004`, JSON vector store).
 
-Current stack facts: SQLite (`data/meetings.db`), ChromaDB (`data/chroma/`), `gemini-embedding-001`, smart RAG (small-talk skip), Jira issues in English, Astro SSR meeting page, 93 unit + 8 live tests.
+Current stack facts: SQLite (`data/meetings.db`), ChromaDB (`data/chroma/`), `gemini-embedding-001`, smart RAG (small-talk skip), Jira issues in English, Astro SSR meeting page, 97 unit + 12 live tests (`test_live_api.py` + `test_live_integration.py`).

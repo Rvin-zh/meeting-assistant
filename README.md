@@ -19,7 +19,7 @@ chmod +x scripts/run-tests.sh
 ./scripts/run-tests.sh
 ```
 
-**93 unit tests** (+ **8 live tests** with real API keys) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh`
+**97 unit tests** (+ **12 live tests** with real APIs) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh` · both: `./scripts/run-all-tests.sh`
 
 ## اجرا
 
@@ -45,3 +45,4 @@ chmod +x scripts/run-frontend.sh
 - `docs/CHANGELOG.md` — **تاریخچه تغییرات** (با هر feature به‌روز شود)
 - `docs/پروژه-اصلی.html` · `docs/پیاده-سازی.html` · `docs/شرح-پروژه-دستیار-جلسه.html`
 - Spec: `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md`
+- Roadmap: `docs/نقشه-اسپرینت‌ها.html` (Sprints 2–6+, no voice/STT)

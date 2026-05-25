@@ -210,8 +210,9 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 <h2>۱۲. تست‌ها</h2>
 <table>
   <tr><th>نوع</th><th>دستور</th><th>تعداد</th></tr>
-  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۹۳</td></tr>
-  <tr><td>live API</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۸</td></tr>
+  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۹۷</td></tr>
+  <tr><td>live API</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۱۲ (HTTP + سرویس)</td></tr>
+  <tr><td>همه</td><td dir="ltr">./scripts/run-all-tests.sh</td><td>واحد + live</td></tr>
 </table>
 
 <h2>۱۳. مدیریت خطا</h2>
@@ -224,7 +225,8 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 </table>
 
 <div class="future">
-  <strong>Sprint 2+:</strong> RAG چندجلسه · map assignee به Jira user · OAuth · STT · Chroma Cloud / pgvector در صورت مقیاس
+  <strong>اسپرینت‌های بعدی:</strong> <a href="نقشه-اسپرینت‌ها.html">نقشه کامل ایده‌ها</a> — Sprint 2: RAG چندجلسه + FTS آرشیو · Sprint 3: Jira assignee + OAuth · Sprint 4: auth/workspace + تقویم (metadata) · Sprint 5: PostgreSQL + queue + deploy · Sprint 6+: multi-agent، داشبورد تسک‌ها.<br>
+  <em>بدون STT / ضبط صوت.</em>
 </div>
 
 </body>
