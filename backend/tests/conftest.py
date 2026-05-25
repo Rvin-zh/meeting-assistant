@@ -86,25 +86,28 @@ class FakeEmbeddingService(EmbeddingService):
 
 @pytest.fixture
 def tmp_data_dirs(tmp_path: Path) -> dict[str, Path]:
-    meetings = tmp_path / "meetings"
-    vectors = tmp_path / "vectors"
+    db = tmp_path / "meetings.db"
+    legacy = tmp_path / "meetings_json"
+    chroma = tmp_path / "chroma"
     synthetic = tmp_path / "synthetic"
-    meetings.mkdir()
-    vectors.mkdir()
+    legacy.mkdir()
+    chroma.mkdir()
     synthetic.mkdir()
     (synthetic / "demo-meeting.txt").write_text(SAMPLE_TRANSCRIPT, encoding="utf-8")
-    return {"meetings": meetings, "vectors": vectors, "synthetic": synthetic}
+    return {"db": db, "legacy": legacy, "chroma": chroma, "synthetic": synthetic}
 
 
 @pytest.fixture
 def meeting_store(tmp_data_dirs: dict[str, Path]) -> MeetingStore:
-    store = MeetingStore(tmp_data_dirs["meetings"])
-    return store
+    return MeetingStore(
+        tmp_data_dirs["db"],
+        legacy_json_dir=tmp_data_dirs["legacy"],
+    )
 
 
 @pytest.fixture
 def vector_store(tmp_data_dirs: dict[str, Path]) -> VectorStore:
-    return VectorStore(tmp_data_dirs["vectors"], embedder=FakeEmbeddingService())
+    return VectorStore(tmp_data_dirs["chroma"], embedder=FakeEmbeddingService())
 
 
 @pytest.fixture

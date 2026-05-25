@@ -30,7 +30,7 @@
 <body>
 
 <h1>پیاده‌سازی — دستیار جلسه سازمانی (MVP)</h1>
-<p class="meta">نسخه واقع‌بینانه · به‌روزرسانی ۱۴۰۵/۰۳/۰۵ · جایگزین <code>پیاده‌سازی.docx</code></p>
+<p class="meta">نسخه واقع‌بینانه · به‌روزرسانی ۱۴۰۵/۰۳/۰۶ · <a href="CHANGELOG.md">CHANGELOG</a> · جایگزین <code>پیاده‌سازی.docx</code></p>
 
 <h2>۱. هدف سامانه</h2>
 <p>
@@ -42,8 +42,8 @@
   <tr><th>قابلیت</th><th>نسخه کامل (سند اولیه)</th><th>MVP فعلی</th></tr>
   <tr><td>ورودی</td><td>ضبط صوت زنده + STT</td><td>✅ transcript آماده (paste + upload)</td></tr>
   <tr><td>تحلیل</td><td>GPT-4 / مدل‌های متنوع</td><td>✅ Gemini Flash + Pydantic AI</td></tr>
-  <tr><td>جستجو</td><td>ElasticSearch</td><td>✅ Vector store JSON محلی</td></tr>
-  <tr><td>تسک</td><td>Jira + Trello + Asana + …</td><td>✅ فقط Jira (<span dir="ltr">KAN</span>)</td></tr>
+  <tr><td>جستجو / Vector DB</td><td>ElasticSearch</td><td>✅ <strong>ChromaDB</strong> embedded (<span dir="ltr">data/chroma/</span>)</td></tr>
+  <tr><td>تسک</td><td>Jira + Trello + Asana + …</td><td>✅ فقط Jira (<span dir="ltr">KAN</span>) — issueها <strong>انگلیسی</strong></td></tr>
   <tr><td>RAG</td><td>آرشیو سازمان</td><td>✅ تک‌جلسه · ⏳ چندجلسه sprint 2</td></tr>
   <tr><td>تقویم / Teams</td><td>ادغام کامل</td><td>❌ sprint بعد</td></tr>
   <tr><td>داشبورد / اعلان</td><td>گزارش هفتگی</td><td>❌ sprint بعد</td></tr>
@@ -58,29 +58,51 @@ sequenceDiagram
     participant API as FastAPI
     participant AA as analysis_agent
     participant RA as rag_agent
-    participant V as Vector Store
+    participant C as ChromaDB
     participant J as Jira KAN
 
     U->>UI: transcript / جلسه نمونه
     UI->>API: POST /api/meetings
     API->>API: parse + chunk + embed
-    API->>V: ذخیره vectors
+    API->>C: index chunks
     API->>AA: run(transcript)
-    AA-->>UI: خلاصه + تسک‌ها
+    AA-->>UI: خلاصه + تسک‌ها (SSR)
     U->>UI: سوال RAG
     UI->>API: POST /ask
-    API->>RA: run + search_chunks tool
-    RA->>V: similarity
-    RA-->>UI: پاسخ + citation
+    API->>C: query by meeting_id
+    API->>RA: context + سوال
+    RA-->>UI: پاسخ طبیعی + footnote
     U->>UI: تأیید تسک
     UI->>API: POST /jira/create
     API->>J: issue جدید
 </pre>
 </div>
 
-<h2>۴. Pydantic AI — Agents و Tools</h2>
+<h2>۴. SQLite — ذخیره جلسات و خلاصه</h2>
+<table>
+  <tr><th>مورد</th><th>مقدار</th></tr>
+  <tr><td>فایل</td><td dir="ltr">data/meetings.db</td></tr>
+  <tr><td>جدول</td><td dir="ltr">meetings</td> — transcript، summary، key_points، decisions، tasks (JSON)</td></tr>
+  <tr><td>مهاجرت</td><td>فایل‌های قدیمی <code dir="ltr">data/meetings/*.json</code> یک‌بار در اولین اجرا import می‌شوند</td></tr>
+</table>
 
-<h3>۴.۱ analysis_agent</h3>
+<h2>۵. ChromaDB — Vector Store</h2>
+<div class="note">
+  <strong>چرا Chroma؟</strong> قبلاً JSON دستی + حلقه cosine در Python بود — برای دمو کند و نگه‌داری سخت.
+  ChromaDB embedded است: بدون سرور جدا، ذخیره در <code dir="ltr">data/chroma/</code>، جستجوی HNSW سریع.
+</div>
+<table>
+  <tr><th>مورد</th><th>مقدار</th></tr>
+  <tr><td>کتابخانه</td><td dir="ltr">chromadb</td></tr>
+  <tr><td>Collection</td><td dir="ltr">meeting_chunks</td></tr>
+  <tr><td>فیلتر</td><td dir="ltr">metadata.meeting_id</td></tr>
+  <tr><td>Embedding</td><td dir="ltr">gemini-embedding-001</td> (از Google API — Chroma فقط ذخیره/جستجو)</td></tr>
+  <tr><td>فاصله</td><td>cosine (HNSW)</td></tr>
+</table>
+
+<h2>۶. Pydantic AI — Agents</h2>
+
+<h3>۶.۱ analysis_agent</h3>
 <pre><code>from pydantic import BaseModel
 from pydantic_ai import Agent
 
@@ -97,22 +119,24 @@ analysis_agent = Agent(
     system_prompt='تحلیل transcript جلسه فارسی. فقط بر اساس متن.',
 )</code></pre>
 
-<h3>۴.۲ rag_agent</h3>
-<pre><code>rag_agent = Agent(
-    'google:gemini-2.5-flash',
-    output_type=RagAnswer,
-    deps_type=MeetingDeps,
-)
+<h3>۶.۲ RAG — رفتار هوشمند</h3>
+<ul>
+  <li><strong>سلام / hello:</strong> بدون جستجو در transcript — پاسخ کوتاه و دعوت به پرسش درباره جلسه</li>
+  <li><strong>سوال جلسه:</strong> Chroma top-4 → context داخلی برای LLM (نمایش خام transcript در UI نیست)</li>
+  <li><strong>پاسخ:</strong> فارسی طبیعی با نسبت‌دادن («علی گفت…») + footnote کوتاه در صورت نیاز</li>
+</ul>
+<pre><code># تشخیص small talk
+is_small_talk("hello") → chitchat_agent, sources=[]
 
-@rag_agent.tool
-async def search_meeting_chunks(ctx, query: str, top_k: int = 5) -> list[str]:
-    return ctx.deps.vector_store.search(ctx.deps.meeting_id, query, top_k)</code></pre>
+# سوال واقعی
+chunks = chroma.query(meeting_id, question)
+rag_agent.run(context + question) → RagAnswer</code></pre>
 
 <div class="note">
-  Jira create از API route مستقیم است (نه agent) — رفتار predictable برای دمو و خطای کمتر.
+  Jira create از API route مستقیم است. Issueها به <strong>انگلیسی</strong> (<code>title_en</code>, <code>context_en</code>) برای خوانایی LTR در Jira — UI همچنان فارسی.
 </div>
 
-<h2>۵. صفحات UI (Astro)</h2>
+<h2>۷. صفحات UI (Astro SSR)</h2>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart TB
@@ -138,7 +162,9 @@ flowchart TB
   <li>نمودارهای Mermaid در wrapper با <code>direction: ltr</code></li>
 </ul>
 
-<h2>۶. API Endpoints</h2>
+<p>صفحه <code dir="ltr">/meeting/[id]</code> داده را در <strong>سرور Astro</strong> از FastAPI می‌گیرد (نه فقط client JS) — رفع مشکل گیر کردن روی «در حال بارگذاری».</p>
+
+<h2>۸. API Endpoints</h2>
 <table>
   <tr><th>Method</th><th>Path</th><th>توضیح</th></tr>
   <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings</td><td>لیست جلسات</td></tr>
@@ -148,7 +174,7 @@ flowchart TB
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/create</td><td>ایجاد در Jira</td></tr>
 </table>
 
-<h2>۷. داده مصنوعی</h2>
+<h2>۹. داده مصنوعی</h2>
 <table>
   <tr><th>فایل</th><th>موضوع</th></tr>
   <tr><td dir="ltr">meeting-01-scrum.txt</td><td>استنداپ هفتگی</td></tr>
@@ -157,27 +183,38 @@ flowchart TB
 </table>
 <p>فرمت: <code dir="ltr">[۱۴:۰۲] علی: متن گفتار</code></p>
 
-<h2>۸. تنظیمات محیط (.env)</h2>
+<h2>۱۰. تنظیمات محیط (.env)</h2>
 <pre><code>GOOGLE_API_KEY=...
+EMBEDDING_MODEL=gemini-embedding-001
+GEMINI_MODEL=google:gemini-2.5-flash
 JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
 JIRA_PROJECT_KEY=KAN
 JIRA_EMAIL=your@email.com
-JIRA_API_TOKEN=...</code></pre>
+JIRA_API_TOKEN=...
+PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 
-<h2>۹. ساختار پروژه</h2>
+<h2>۱۱. ساختار پروژه</h2>
 <pre><code>project/
-├── frontend/          # Astro — UI فارسی
+├── frontend/          # Astro SSR — UI فارسی RTL
 ├── backend/
 │   ├── main.py
-│   ├── agents/        # Pydantic AI
-│   ├── services/      # embed, jira, parser
+│   ├── agents/        # analysis_agent, rag_agent
+│   ├── services/      # sqlite meeting_store, chroma, jira, embed
 │   └── models/
-├── data/synthetic/
-├── data/meetings/
-├── data/vectors/
-└── docs/</code></pre>
+├── data/synthetic/    # جلسات نمونه
+├── data/meetings.db   # SQLite — خلاصه و تسک‌ها
+├── data/chroma/       # ChromaDB persist
+├── docs/              # HTML + CHANGELOG
+└── scripts/           # run-backend, run-tests, run-live-tests</code></pre>
 
-<h2>۱۰. مدیریت خطا</h2>
+<h2>۱۲. تست‌ها</h2>
+<table>
+  <tr><th>نوع</th><th>دستور</th><th>تعداد</th></tr>
+  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۹۳</td></tr>
+  <tr><td>live API</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۸</td></tr>
+</table>
+
+<h2>۱۳. مدیریت خطا</h2>
 <table>
   <tr><th>خطا</th><th>رفتار</th></tr>
   <tr><td>Gemini timeout</td><td>retry ×1 + پیام فارسی</td></tr>
@@ -187,7 +224,7 @@ JIRA_API_TOKEN=...</code></pre>
 </table>
 
 <div class="future">
-  <strong>Sprint 2+:</strong> RAG چندجلسه · map assignee به Jira user · OAuth · STT · ElasticSearch یا pgvector
+  <strong>Sprint 2+:</strong> RAG چندجلسه · map assignee به Jira user · OAuth · STT · Chroma Cloud / pgvector در صورت مقیاس
 </div>
 
 </body>

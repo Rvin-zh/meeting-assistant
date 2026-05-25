@@ -1,5 +1,5 @@
 from backend.agents.analysis import analyze_transcript
-from backend.config import MEETINGS_DIR, VECTORS_DIR
+from backend.config import CHROMA_DIR, SQLITE_PATH
 from backend.models.schemas import CreateMeetingRequest, MeetingAnalysis, MeetingRecord
 from backend.services.meeting_store import MeetingStore
 from backend.services.transcript import (
@@ -18,8 +18,8 @@ async def ingest_meeting(
     store: MeetingStore | None = None,
     vector_store: VectorStore | None = None,
 ) -> MeetingRecord:
-    meeting_store = store or MeetingStore(MEETINGS_DIR)
-    vectors = vector_store or VectorStore(VECTORS_DIR)
+    meeting_store = store or MeetingStore(SQLITE_PATH)
+    vectors = vector_store or VectorStore(CHROMA_DIR)
 
     turns = parse_transcript(transcript)
     if not turns:

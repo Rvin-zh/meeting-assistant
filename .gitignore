@@ -13,6 +13,8 @@ __pycache__/
 .pytest_cache/
 .backend/
 data/meetings/
+data/meetings.db
+data/chroma/
 data/vectors/
 .~lock.*
 *.docx

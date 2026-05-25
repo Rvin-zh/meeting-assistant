@@ -74,13 +74,8 @@ async def test_gemini_analysis_agent_live(google_configured: None):
 @pytest.mark.asyncio
 async def test_full_ingest_and_rag_live(google_configured: None, tmp_path: Path):
     """End-to-end RAG with real embeddings + Gemini (analysis stubbed to avoid loop issues)."""
-    meetings_dir = tmp_path / "meetings"
-    vectors_dir = tmp_path / "vectors"
-    meetings_dir.mkdir()
-    vectors_dir.mkdir()
-
-    store = MeetingStore(meetings_dir)
-    vectors = VectorStore(vectors_dir)
+    store = MeetingStore(tmp_path / "meetings.db", legacy_json_dir=None)
+    vectors = VectorStore(tmp_path / "chroma")
 
     turns = parse_transcript(LIVE_TRANSCRIPT)
     formatted = format_transcript(turns)

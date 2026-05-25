@@ -1,26 +1,29 @@
 # دستیار جلسه سازمانی — Design Spec
 
 **تاریخ:** 2026-05-26  
-**وضعیت:** تأیید‌شده (با Pydantic AI)  
-**هدف:** MVP دمو با UI فارسی، RAG تک‌جلسه، استخراج تسک، Jira واقعی
+**آخرین به‌روزرسانی:** 2026-05-26 (ChromaDB, RAG هوشمند, Jira EN, SSR)  
+**وضعیت:** MVP پیاده‌شده  
+**هدف:** MVP دمو با UI فارسی، RAG تک‌جلسه، استخراج تسک، Jira واقعی  
+**مخزن:** https://github.com/Rvin-zh/meeting-assistant
 
 ---
 
 ## ۱. خلاصه
 
-اپ **دستیار جلسه** transcript فارسی (با نام گوینده) می‌گیرد، با **Gemini** خلاصه و تسک استخراج می‌کند، **RAG** برای پرسش از همان جلسه دارد، و تسک‌ها را با preview به **Jira (KAN)** می‌فرستد.
+اپ **دستیار جلسه** transcript فارسی (با نام گوینده) می‌گیرد، با **Gemini** خلاصه و تسک استخراج می‌کند، **RAG** برای پرسش از همان جلسه دارد، و تسک‌ها را با preview به **Jira (KAN)** می‌فرستد. Issueهای Jira به **انگلیسی** ثبت می‌شوند؛ UI فارسی RTL است.
 
 **Stack:**
 
 | لایه | فناوری |
 |------|--------|
-| UI | Astro (سبک، RTL فارسی) |
+| UI | Astro SSR (سبک، RTL فارسی) |
 | API | FastAPI |
-| Agentic | **Pydantic AI** (سبک، typed tools + structured output) |
-| LLM | `google:gemini-2.5-flash` (یا `gemini-3-flash-preview`) |
-| Embedding | Google `text-embedding-004` |
-| Vector store | JSON محلی (`data/vectors/`) |
-| Jira | REST API v3 |
+| Agentic | **Pydantic AI** (typed output) |
+| LLM | `google:gemini-2.5-flash` |
+| Embedding | `gemini-embedding-001` |
+| Meetings DB | **SQLite** (`data/meetings.db`) — transcript, summary, tasks |
+| Vector store | **ChromaDB** embedded (`data/chroma/`) |
+| Jira | REST API v3 — پروژه `KAN` |
 
 ---
 
@@ -28,38 +31,38 @@
 
 ```mermaid
 flowchart LR
-    UI["Astro UI<br/>فارسی RTL"]
+    UI["Astro SSR<br/>فارسی RTL"]
     API["FastAPI"]
     PA["Pydantic AI Agents"]
     G["Gemini Flash"]
     E["Embeddings"]
-    V["Vector Store"]
+    C["ChromaDB"]
     J["Jira KAN"]
 
     UI --> API
     API --> PA
     PA --> G
     API --> E
-    E --> V
-    PA --> V
+    E --> C
+    PA --> C
     API --> J
 ```
 
 ### چرا Pydantic AI؟
 
 - خروجی **ساختاریافته** با مدل‌های Pydantic (خلاصه، تسک‌ها)
-- **Tools** سبک (`search_meeting_chunks`, `preview_jira_issues`) بدون LangChain سنگین
-- یکپارچه با **Google Gemini** via `GoogleModel` / prefix `google:`
-- قابل گسترش به multi-agent در sprint بعد بدون بازنویسی کل pipeline
+- یکپارچه با **Google Gemini** via prefix `google:`
+- RAG: retrieval در service layer + `rag_agent` برای تولید پاسخ طبیعی (نه tool loop سنگین)
 
-### Agents (MVP — ۲ agent)
+### Agents (MVP)
 
 | Agent | نقش | خروجی |
 |-------|-----|--------|
-| `analysis_agent` | ingest transcript | `MeetingAnalysis` (Pydantic) |
-| `rag_agent` | پاسخ سوال | `RagAnswer` + tool `search_chunks` |
+| `analysis_agent` | ingest transcript | `MeetingAnalysis` (فارسی + `title_en` برای Jira) |
+| `rag_agent` | پاسخ سوال با context از Chroma | `RagAnswer` |
+| `chitchat` (helper) | سلام/hello | پاسخ کوتاه، بدون vector search |
 
-Jira create از **API route** مستقیم (بدون agent) — predictable و ساده برای دمو. Preview می‌تواند tool یا helper باشد.
+Jira create از **API route** مستقیم — predictable برای دمو.
 
 ---
 
@@ -68,13 +71,16 @@ Jira create از **API route** مستقیم (بدون agent) — predictable و 
 ```python
 class MeetingTask(BaseModel):
     title: str
+    title_en: str | None      # برای Jira
     assignee: str | None
     deadline: str | None
     priority: Literal["high", "medium", "low"]
-    context: str  # جمله مرجع
+    context: str
+    context_en: str | None
 
 class MeetingAnalysis(BaseModel):
     title: str
+    title_en: str | None
     summary: str
     key_points: list[str]
     decisions: list[str]
@@ -82,7 +88,7 @@ class MeetingAnalysis(BaseModel):
 
 class RagAnswer(BaseModel):
     answer: str
-    sources: list[ChunkCitation]
+    sources: list[ChunkCitation]  # footnote کوتاه، نه dump خام
 
 class ChunkCitation(BaseModel):
     speaker: str
@@ -90,24 +96,21 @@ class ChunkCitation(BaseModel):
     chunk_id: str
 ```
 
-`analysis_agent` با `output_type=MeetingAnalysis`.  
-`rag_agent` با `output_type=RagAnswer` و `@rag_agent.tool` برای `search_meeting_chunks`.
-
 ---
 
 ## ۴. API Routes
 
-| Method | مسیر | Agent / Logic |
-|--------|------|---------------|
+| Method | مسیر | Logic |
+|--------|------|-------|
 | GET | `/api/meetings` | لیست جلسات |
-| POST | `/api/meetings` | parse → embed → `analysis_agent.run` |
+| POST | `/api/meetings` | parse → Chroma index → `analysis_agent` |
 | GET | `/api/meetings/{id}` | جزئیات |
-| POST | `/api/meetings/{id}/ask` | `rag_agent.run` |
-| POST | `/api/meetings/{id}/jira/preview` | map tasks → issue payload |
+| POST | `/api/meetings/{id}/ask` | small-talk یا Chroma + `rag_agent` |
+| POST | `/api/meetings/{id}/jira/preview` | map tasks → issue payload (EN) |
 | POST | `/api/meetings/{id}/jira/create` | Jira REST |
 | GET | `/api/health` | env status |
 
-Astro در dev به `http://localhost:8000` proxy می‌کند.
+Frontend: `PUBLIC_BACKEND_URL` (پیش‌فرض `http://127.0.0.1:8000`).
 
 ---
 
@@ -117,30 +120,31 @@ Astro در dev به `http://localhost:8000` proxy می‌کند.
 
 1. Parse transcript: `[HH:MM] name: text`
 2. Chunk: ۳–۵ turn گفتگو
-3. Embed با `text-embedding-004` → `data/vectors/{meeting_id}.json`
-4. `analysis_agent.run(transcript)` → ذخیره JSON در `data/meetings/{id}.json`
+3. Embed با `gemini-embedding-001` → upsert در Chroma collection `meeting_chunks` (metadata: `meeting_id`, `speaker`, …)
+4. `analysis_agent.run(transcript)` → ذخیره در SQLite (`meetings` table)
 
 ### RAG
 
-1. Embed question
-2. Tool `search_meeting_chunks(meeting_id, query, top_k=5)` — cosine similarity
-3. Agent با context chunks پاسخ + citation
+1. اگر `is_small_talk(question)` → پاسخ chitchat، `sources=[]`
+2. وگرنه: Chroma `query` با فیلتر `meeting_id`, `top_k=4`
+3. Context به‌صورت داخلی به `rag_agent` — پاسخ فارسی طبیعی + footnote کوتاه در صورت نیاز
+4. فلگ `used_meeting_context` در پاسخ API
 
 ### Jira
 
-- Preview: ساخت `summary`, `description`, `priority` بدون POST
-- Create: `POST /rest/api/3/issue` به پروژه `KAN`
+- Preview / Create: `summary` و `description` از `title_en` / `context_en` (fallback به فارسی)
+- `POST /rest/api/3/issue` به پروژه `KAN`
 - Assignee فقط در description (MVP)
 
 ---
 
-## ۶. UI (Astro RTL)
+## ۶. UI (Astro SSR RTL)
 
-| صفحه | مسیر |
-|------|------|
-| خانه | `/` |
-| جلسه | `/meeting/[id]` — تب: خلاصه · تسک‌ها · پرسش |
-| تنظیمات | `/settings` |
+| صفحه | مسیر | یادداشت |
+|------|------|---------|
+| خانه | `/` | ingest + لیست |
+| جلسه | `/meeting/[id]` | **SSR fetch** از FastAPI — تب خلاصه · تسک · پرسش |
+| تنظیمات | `/settings` | env hints |
 
 `dir="rtl"`, فونت Vazirmatn, کد/URL در `dir="ltr"`.
 
@@ -152,16 +156,21 @@ Astro در dev به `http://localhost:8000` proxy می‌کند.
 `data/synthetic/meeting-02-planning.txt`  
 `data/synthetic/meeting-03-review.txt`
 
+پس از مهاجرت به Chroma، جلسات قدیمی را یک‌بار **دوباره ingest** کنید.
+
 ---
 
 ## ۸. Env
 
 ```
 GOOGLE_API_KEY=
+GEMINI_MODEL=google:gemini-2.5-flash
+EMBEDDING_MODEL=gemini-embedding-001
 JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
 JIRA_PROJECT_KEY=KAN
 JIRA_EMAIL=
 JIRA_API_TOKEN=
+PUBLIC_BACKEND_URL=http://127.0.0.1:8000
 ```
 
 ---
@@ -170,23 +179,18 @@ JIRA_API_TOKEN=
 
 ```
 project/
-├── frontend/          # Astro
+├── frontend/          # Astro SSR
 ├── backend/
-│   ├── main.py        # FastAPI
-│   ├── agents/
-│   │   ├── analysis.py
-│   │   └── rag.py
-│   ├── services/
-│   │   ├── embeddings.py
-│   │   ├── vector_store.py
-│   │   ├── transcript.py
-│   │   └── jira.py
+│   ├── main.py
+│   ├── agents/        # analysis.py, rag.py
+│   ├── services/      # vector_store (Chroma), embeddings, jira, ingest
 │   └── models/
 ├── data/
 │   ├── synthetic/
-│   ├── meetings/
-│   └── vectors/
-├── docs/
+│   ├── meetings.db    # gitignored — SQLite
+│   └── chroma/        # gitignored
+├── docs/              # HTML + CHANGELOG.md
+├── scripts/           # run-backend, run-tests, run-live-tests
 └── .env
 ```
 
@@ -203,11 +207,14 @@ project/
 
 ---
 
-## ۱۱. تست (MVP)
+## ۱۱. تست
 
-- Unit: parser transcript, cosine search
-- Integration: `analysis_agent` روی synthetic meeting-01
-- Manual: Jira create در KAN، RAG ۳ سوال نمونه
+| نوع | دستور | تعداد |
+|-----|--------|-------|
+| Unit (mock) | `./scripts/run-tests.sh` | 93 |
+| Live API | `./scripts/run-live-tests.sh` | 8 |
+
+پوشش: parser، Chroma vector_store، RAG small-talk، agents (mock).
 
 ---
 
@@ -218,14 +225,18 @@ project/
 | ۲ | RAG چندجلسه‌ای |
 | ۳ | Agent Jira با tool + assignee map |
 | ۴ | STT، auth، deploy سازمانی |
-| ۵ | Multi-agent orchestrator (debate/review) |
+| ۵ | Multi-agent orchestrator |
 
 ---
 
-## ۱۳. اسناد HTML فارسی
+## ۱۳. اسناد و نگهداری
 
-- `docs/پروژه-اصلی.html`
-- `docs/پیاده-سازی.html`
-- `docs/شرح-پروژه-دستیار-جلسه.html`
+| سند | نقش |
+|-----|-----|
+| `docs/پروژه-اصلی.html` | چشم‌انداز |
+| `docs/پیاده-سازی.html` | جزئیات فنی |
+| `docs/شرح-پروژه-دستیار-جلسه.html` | دوره / RAG |
+| `docs/CHANGELOG.md` | **با هر تغییر معماری به‌روز شود** |
+| این spec | مرجع مهندسی |
 
-هر سند: RTL، نمودار Mermaid در wrapper LTR.
+**قانون:** پس از هر تغییر مهم → یک خط CHANGELOG + بخش مربوط در HTML/spec.

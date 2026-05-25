@@ -2,6 +2,10 @@
 
 اپ دمو برای تحلیل transcript جلسات فارسی: خلاصه، تسک، RAG، Jira.
 
+**Meetings DB:** SQLite (`data/meetings.db`) — transcripts, summaries, tasks. Legacy JSON in `data/meetings/` migrates on first start.
+
+**Vector DB:** [ChromaDB](https://www.trychroma.com/) (embedded, local — `data/chroma/`).
+
 ## پیش‌نیاز
 
 - Python 3.11+
@@ -15,7 +19,7 @@ chmod +x scripts/run-tests.sh
 ./scripts/run-tests.sh
 ```
 
-**79 unit tests** (+ **8 live tests** with real API keys) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh`
+**93 unit tests** (+ **8 live tests** with real API keys) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh`
 
 ## اجرا
 
@@ -37,7 +41,7 @@ chmod +x scripts/run-frontend.sh
 
 ## اسناد
 
-- `docs/پروژه-اصلی.html`
-- `docs/پیاده-سازی.html`
-- `docs/شرح-پروژه-دستیار-جلسه.html`
+- `docs/README.md` — فهرست مستندات
+- `docs/CHANGELOG.md` — **تاریخچه تغییرات** (با هر feature به‌روز شود)
+- `docs/پروژه-اصلی.html` · `docs/پیاده-سازی.html` · `docs/شرح-پروژه-دستیار-جلسه.html`
 - Spec: `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md`
