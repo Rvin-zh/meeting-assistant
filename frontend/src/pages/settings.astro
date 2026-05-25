@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="تنظیمات">
+  <h1>تنظیمات</h1>
+  <p class="muted">متغیرهای محیطی از فایل <code dir="ltr">.env</code> در ریشه پروژه خوانده می‌شوند.</p>
+  <div id="health" class="card"></div>
+  <div class="card">
+    <h2>راهنمای .env</h2>
+    <pre dir="ltr"><code>GOOGLE_API_KEY=...
+JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
+JIRA_PROJECT_KEY=KAN
+JIRA_EMAIL=...
+JIRA_API_TOKEN=...</code></pre>
+  </div>
+</Layout>
+
+<script>
+  import { api } from '../lib/api';
+  const el = document.getElementById('health')!;
+  api.health().then((h) => {
+    el.innerHTML = `
+      <p><strong>وضعیت:</strong> ${h.status}</p>
+      <p><strong>Google API:</strong> ${h.google_api ? '✓' : '✗'}</p>
+      <p><strong>Jira:</strong> ${h.jira_configured ? '✓' : '✗'}</p>
+      <p dir="ltr"><strong>Site:</strong> ${(h as any).jira_site ?? ''}</p>`;
+  }).catch(() => {
+    el.innerHTML = '<p class="alert alert-error">backend در دسترس نیست — uvicorn را اجرا کنید.</p>';
+  });
+</script>
