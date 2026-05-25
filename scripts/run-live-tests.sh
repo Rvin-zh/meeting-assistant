@@ -14,8 +14,7 @@ if [ ! -x "$PYTHON" ]; then
 fi
 
 export PYTHONPATH="$ROOT"
-echo "Running LIVE integration tests (real Google + Jira API calls)..."
-exec "$PYTHON" -m pytest \
-  backend/tests/test_live_integration.py \
-  backend/tests/test_live_api.py \
-  --run-live -v -s "$@"
+echo "Running LIVE tests (real Google + Jira API calls)..."
+# Separate processes avoid Pydantic AI 'Event loop is closed' across many Gemini calls
+"$PYTHON" -m pytest backend/tests/test_live_api.py --run-live -v -s "$@"
+"$PYTHON" -m pytest backend/tests/test_live_integration.py --run-live -v -s "$@"

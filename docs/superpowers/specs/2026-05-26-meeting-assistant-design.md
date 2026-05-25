@@ -211,8 +211,8 @@ project/
 
 | نوع | دستور | تعداد |
 |-----|--------|-------|
-| Unit (mock) | `./scripts/run-tests.sh` | 93 |
-| Live API | `./scripts/run-live-tests.sh` | 8 |
+| Unit (mock) | `./scripts/run-tests.sh` | 97 |
+| Live API | `./scripts/run-live-tests.sh` | 12 |
 
 پوشش: parser، Chroma vector_store، RAG small-talk، agents (mock).
 
@@ -220,12 +220,16 @@ project/
 
 ## ۱۲. Sprintهای آینده
 
+**جزئیات کامل:** [future-sprints-roadmap.md](future-sprints-roadmap.md) · [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html)  
+**خارج از scope:** STT / ضبط صوت / voice-to-text
+
 | Sprint | قابلیت |
 |--------|--------|
-| ۲ | RAG چندجلسه‌ای |
-| ۳ | Agent Jira با tool + assignee map |
-| ۴ | STT، auth، deploy سازمانی |
-| ۵ | Multi-agent orchestrator |
+| ۲ | RAG چندجلسه، FTS آرشیو، export خلاصه، compare agent |
+| ۳ | Jira assignee map، `jira_agent`، OAuth، ویرایش قبل از create |
+| ۴ | Auth، workspace/RBAC، تقویم (metadata)، ایمیل/Slack |
+| ۵ | PostgreSQL، queue ingest، observability، deploy، eval |
+| ۶+ | Multi-agent orchestrator، decision tracking، dashboard، Confluence |
 
 ---
 

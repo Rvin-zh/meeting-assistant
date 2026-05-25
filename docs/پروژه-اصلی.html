@@ -98,18 +98,20 @@ flowchart TB
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart LR
-    S1["Sprint 1<br/>MVP دمو"]
-    S2["Sprint 2<br/>RAG چندجلسه"]
-    S3["Sprint 3<br/>Jira assignee + OAuth"]
-    S4["Sprint 4<br/>STT + تقویم"]
-    S5["Sprint 5<br/>Deploy سازمانی"]
+    S1["Sprint 1 ✅<br/>MVP دمو"]
+    S2["Sprint 2<br/>آرشیو · RAG چندجلسه"]
+    S3["Sprint 3<br/>Jira · assignee map"]
+    S4["Sprint 4<br/>Auth · تقویم · اعلان"]
+    S5["Sprint 5<br/>Postgres · deploy"]
+    S6["Sprint 6+<br/>چندعامله · داشبورد"]
 
-    S1 --> S2 --> S3 --> S4 --> S5
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
 </pre>
 </div>
 
 <div class="future">
-  <strong>فاز سازمانی (آینده):</strong> احراز هویت، multi-tenant، audit log، SLA، استقرار on-prem یا Cloud اختصاصی — در MVP ذکر می‌شود اما پیاده نمی‌شود.
+  <strong>جزئیات اسپرینت‌های ۲–۶+:</strong> <a href="نقشه-اسپرینت‌ها.html">نقشه-اسپرینت‌ها.html</a> — RAG چندجلسه، Jira هوشمند، auth/workspace، مقیاس، agents پیشرفته.<br>
+  <strong>خارج از scope:</strong> تبدیل گفتار به متن (STT) و ضبط صوت.
 </div>
 
 <h2>۷. فناوری‌ها</h2>
@@ -132,7 +134,7 @@ flowchart LR
   <li>۳ جلسه مصنوعی فارسی پردازش شوند</li>
   <li>خلاصه + تسک با کیفیت قابل قبول نمایش داده شود</li>
   <li>حداقل ۳ سوال RAG با پاسخ طبیعی + footnote پاسخ داده شود</li>
-  <li>۹۳ تست واحد + ۸ تست live API سبز باشند</li>
+  <li>۹۷ تست واحد + ۱۲ تست live API سبز باشند</li>
   <li>حداقل ۱ issue در Jira ایجاد شود</li>
   <li>UI کاملاً فارسی و RTL باشد</li>
 </ul>
