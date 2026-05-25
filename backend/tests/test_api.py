@@ -23,6 +23,8 @@ class TestHealthEndpoint:
         assert data["status"] == "ok"
         assert "google_api" in data
         assert "jira_site" in data
+        assert "database" in data
+        assert data["database"].endswith("meetings.db")
 
 
 class TestMeetingsList:

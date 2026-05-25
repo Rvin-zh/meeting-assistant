@@ -7,14 +7,16 @@ alwaysApply: true
 
 When you change backend, frontend, agents, vector store, Jira, or env:
 
-1. Add one line to `docs/CHANGELOG.md` (date + short Persian summary).
-2. Update the relevant section in:
+1. Add or update **unit tests** (`backend/tests/`) and **live tests** (`test_live_integration.py`, `test_live_api.py`) for the change.
+2. Run `./scripts/run-tests.sh` and `./scripts/run-live-tests.sh` (or `./scripts/run-all-tests.sh`) before claiming done.
+3. Add one line to `docs/CHANGELOG.md` (date + short Persian summary).
+4. Update the relevant section in:
    - `docs/پیاده-سازی.html` (technical detail)
    - `docs/پروژه-اصلی.html` (product/architecture)
    - `docs/شرح-پروژه-دستیار-جلسه.html` (course/RAG narrative)
    - `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md` (engineering spec)
-3. Bump the meta date in HTML (`به‌روزرسانی ۱۴۰۵/...`) when editing those files.
-4. Update root `README.md` if run commands, test counts, or stack change.
+5. Bump the meta date in HTML (`به‌روزرسانی ۱۴۰۵/...`) when editing those files.
+6. Update root `README.md` if run commands, test counts, or stack change.
 
 Do not leave outdated references (e.g. `data/vectors/`, `text-embedding-004`, JSON vector store).
 
