@@ -186,7 +186,7 @@ def pytest_collection_modifyitems(
         reason="Pass --run-live to execute real API integration tests"
     )
     for item in items:
-        if "live" in item.keywords:
+        if "live" in item.keywords or "live_api" in item.nodeid:
             item.add_marker(skip_live)
 
 

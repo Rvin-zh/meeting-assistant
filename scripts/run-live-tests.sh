@@ -15,4 +15,7 @@ fi
 
 export PYTHONPATH="$ROOT"
 echo "Running LIVE integration tests (real Google + Jira API calls)..."
-exec "$PYTHON" -m pytest backend/tests/test_live_integration.py --run-live -v -s "$@"
+exec "$PYTHON" -m pytest \
+  backend/tests/test_live_integration.py \
+  backend/tests/test_live_api.py \
+  --run-live -v -s "$@"
