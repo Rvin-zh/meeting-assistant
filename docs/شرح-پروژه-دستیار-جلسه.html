@@ -29,7 +29,7 @@
 <body>
 
 <h1>شرح پروژه — دستیار جلسه (محصول AI-native)</h1>
-<p class="meta">MVP دوره طراحی محصولات AI-native · جایگزین <code>شرح پروژه- دستیار جلسه.docx</code></p>
+<p class="meta">MVP دوره طراحی محصولات AI-native · به‌روزرسانی ۱۴۰۵/۰۳/۰۶ · <a href="CHANGELOG.md">CHANGELOG</a> · جایگزین <code>شرح پروژه- دستیار جلسه.docx</code></p>
 
 <h2>۱. ایده محصول</h2>
 <p>
@@ -49,20 +49,21 @@
 <pre class="mermaid">
 flowchart LR
     T["Transcript"] --> C["Chunk<br/>۳–۵ turn"]
-    C --> E["text-embedding-004"]
-    E --> V["Vector JSON"]
-    Q["سوال کاربر"] --> EQ["Embed سوال"]
-    EQ --> S["Top-K similarity"]
-    S --> CTX["Context chunks"]
-    CTX --> AG["rag_agent<br/>Pydantic AI"]
-    AG --> A["پاسخ + citation"]
+    C --> E["gemini-embedding-001"]
+    E --> V["ChromaDB<br/>meeting_chunks"]
+    Q["سوال کاربر"] --> ST{"small talk?"}
+    ST -->|سلام/hello| CH["chitchat — بدون جستجو"]
+    ST -->|خیر| S["Chroma query top-4"]
+    S --> CTX["Context داخلی"]
+    CTX --> AG["rag_agent"]
+    AG --> A["پاسخ طبیعی + footnote"]
 </pre>
 </div>
 
 <table>
   <tr><th>مرحله</th><th>MVP (Sprint 1)</th><th>آینده</th></tr>
   <tr><td>دامنه جستجو</td><td>یک جلسه</td><td>آرشیو چندجلسه + فیلتر پروژه</td></tr>
-  <tr><td>Vector DB</td><td>JSON محلی</td><td>pgvector / Vertex AI Vector Search</td></tr>
+  <tr><td>Vector DB</td><td><strong>ChromaDB</strong> (<span dir="ltr">data/chroma/</span>)</td><td>Chroma Cloud / pgvector / Vertex</td></tr>
   <tr><td>Chunking</td><td>بر اساس turn گفتگو</td><td>semantic + overlap</td></tr>
 </table>
 
@@ -72,7 +73,8 @@ flowchart LR
 </p>
 <ul>
   <li><strong>Typed output:</strong> مدل‌های Pydantic برای خلاصه و تسک — validation خودکار</li>
-  <li><strong>Tools:</strong> <code>search_meeting_chunks</code> برای RAG</li>
+  <li><strong>RAG:</strong> Chroma retrieval + <code>rag_agent</code> — بدون نمایش خام <code>[c0] speaker: …</code> در UI</li>
+  <li><strong>Jira:</strong> فیلدهای انگلیسی (<code>title_en</code>) برای issue؛ UI فارسی</li>
   <li><strong>Gemini native:</strong> <span dir="ltr">Agent('google:gemini-2.5-flash')</span></li>
   <li><strong>قابل گسترش:</strong> agent Jira، multi-agent debate در sprint بعد</li>
 </ul>
@@ -82,7 +84,7 @@ flowchart LR
 flowchart TB
     subgraph agents ["Agents — Sprint 1"]
         A1["analysis_agent"]
-        A2["rag_agent + tool"]
+        A2["rag_agent + Chroma"]
     end
     subgraph future ["Agents — Sprint 3+"]
         A3["jira_agent"]
@@ -155,7 +157,7 @@ flowchart LR
   <ol>
     <li>اپ دمو (Astro + FastAPI + Pydantic AI)</li>
     <li>۳ جلسه مصنوعی فارسی</li>
-    <li>این ۳ سند HTML + spec در <code dir="ltr">docs/superpowers/specs/</code></li>
+    <li>۳ سند HTML + <a href="CHANGELOG.md">CHANGELOG</a> + spec در <code dir="ltr">docs/</code></li>
     <li>دمو زنده: خلاصه · RAG · ایجاد issue در Jira</li>
   </ol>
 </div>
@@ -164,7 +166,10 @@ flowchart LR
 <table>
   <tr><th>کاربرد</th><th>مدل</th></tr>
   <tr><td>تحلیل + RAG generation</td><td dir="ltr">google:gemini-2.5-flash</td></tr>
-  <tr><td>Embedding</td><td dir="ltr">text-embedding-004</td></tr>
+  <tr><td>Embedding</td><td dir="ltr">gemini-embedding-001</td></tr>
+  <tr><td>Vector DB</td><td dir="ltr">ChromaDB</td></tr>
+  <tr><td>UI</td><td>Astro SSR — صفحه جلسه</td></tr>
+  <tr><td>مخزن</td><td><a href="https://github.com/Rvin-zh/meeting-assistant" dir="ltr">github.com/Rvin-zh/meeting-assistant</a></td></tr>
 </table>
 <p>در صورت نیاز می‌توان به <span dir="ltr">gemini-3-flash-preview</span> ارتقا داد — API یکسان است.</p>
 

@@ -7,8 +7,8 @@ from backend.config import (
     JIRA_API_TOKEN,
     JIRA_EMAIL,
     JIRA_SITE_URL,
-    MEETINGS_DIR,
-    VECTORS_DIR,
+    CHROMA_DIR,
+    SQLITE_PATH,
 )
 from backend.models.schemas import (
     AskRequest,
@@ -31,8 +31,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-meeting_store = MeetingStore(MEETINGS_DIR)
-vector_store = VectorStore(VECTORS_DIR)
+meeting_store = MeetingStore(SQLITE_PATH)
+vector_store = VectorStore(CHROMA_DIR)
 
 
 @app.get("/api/health")
@@ -42,6 +42,7 @@ async def health() -> dict:
         "google_api": bool(GOOGLE_API_KEY),
         "jira_configured": bool(JIRA_EMAIL and JIRA_API_TOKEN),
         "jira_site": JIRA_SITE_URL,
+        "database": str(SQLITE_PATH),
     }
 
 

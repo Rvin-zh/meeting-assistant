@@ -28,7 +28,7 @@
 <body>
 
 <h1>پروژه اصلی — هسته دستیار هوشمند سازمانی</h1>
-<p class="meta">نسخه MVP · به‌روزرسانی ۱۴۰۵/۰۳/۰۵ · جایگزین <code>پروژه اصلی.docx</code></p>
+<p class="meta">نسخه MVP · به‌روزرسانی ۱۴۰۵/۰۳/۰۶ · <a href="CHANGELOG.md">CHANGELOG</a> · جایگزین <code>پروژه اصلی.docx</code></p>
 
 <h2>۱. بیان محصول</h2>
 <p>
@@ -50,7 +50,8 @@
   <li>ورود transcript فارسی با نام گوینده (paste یا فایل)</li>
   <li>استخراج خودکار <strong>خلاصه</strong>، <strong>نکات مهم</strong>، <strong>تصمیمات</strong> و <strong>تسک‌ها</strong></li>
   <li><strong>RAG</strong> برای پرسش از همان جلسه</li>
-  <li>ارسال تسک به <strong>Jira</strong> با preview</li>
+  <li>ارسال تسک به <strong>Jira</strong> با preview (issueها به <strong>انگلیسی</strong> — UI فارسی)</li>
+  <li><strong>RAG هوشمند:</strong> پاسخ طبیعی؛ سلام/hello بدون جستجو در transcript</li>
 </ul>
 
 <div class="note">
@@ -69,14 +70,16 @@ flowchart TB
         PAI["Pydantic AI Agents"]
         Gemini["Gemini Flash"]
         Embed["Google Embeddings"]
-        VS["Vector Store محلی"]
+        SQLite["SQLite<br/>meetings.db"]
+        Chroma["ChromaDB<br/>data/chroma/"]
         Jira["Jira Cloud"]
     end
     Astro --> FastAPI
     FastAPI --> PAI
     PAI --> Gemini
-    FastAPI --> Embed --> VS
-    PAI --> VS
+    FastAPI --> SQLite
+    FastAPI --> Embed --> Chroma
+    PAI --> Chroma
     FastAPI --> Jira
 </pre>
 </div>
@@ -85,7 +88,7 @@ flowchart TB
 <table>
   <tr><th>Agent</th><th>وظیفه</th></tr>
   <tr><td><code>analysis_agent</code></td><td>تحلیل transcript → خروجی ساختاریافته Pydantic</td></tr>
-  <tr><td><code>rag_agent</code></td><td>پاسخ سوال با tool جستجو در chunkها</td></tr>
+  <tr><td><code>rag_agent</code></td><td>پاسخ سوال با context از Chroma (بدون dump خام transcript)</td></tr>
 </table>
 <p>
   فریمورک <a href="https://ai.pydantic.dev/" dir="ltr">Pydantic AI</a> انتخاب شده چون typed، سبک، و مستقیماً با Gemini یکپارچه است — بدون LangChain سنگین.
@@ -116,7 +119,11 @@ flowchart LR
   <tr><td>Backend</td><td>FastAPI + Python 3.11+</td></tr>
   <tr><td>Agentic</td><td>Pydantic AI</td></tr>
   <tr><td>LLM</td><td><span dir="ltr">google:gemini-2.5-flash</span></td></tr>
-  <tr><td>Embedding</td><td><span dir="ltr">text-embedding-004</span></td></tr>
+  <tr><td>Meetings DB</td><td><span dir="ltr">SQLite</span> (<span dir="ltr">data/meetings.db</span>)</td></tr>
+  <tr><td>Vector DB</td><td><span dir="ltr">ChromaDB</span> (embedded)</td></tr>
+  <tr><td>Embedding</td><td><span dir="ltr">gemini-embedding-001</span></td></tr>
+  <tr><td>Frontend</td><td>Astro SSR — بارگذاری جلسه از سرور</td></tr>
+  <tr><td>مخزن</td><td><a href="https://github.com/Rvin-zh/meeting-assistant" dir="ltr">Rvin-zh/meeting-assistant</a></td></tr>
   <tr><td>Issue tracking</td><td>Jira Cloud — پروژه <span dir="ltr">KAN</span></td></tr>
 </table>
 
@@ -124,7 +131,8 @@ flowchart LR
 <ul>
   <li>۳ جلسه مصنوعی فارسی پردازش شوند</li>
   <li>خلاصه + تسک با کیفیت قابل قبول نمایش داده شود</li>
-  <li>حداقل ۳ سوال RAG با citation پاسخ داده شود</li>
+  <li>حداقل ۳ سوال RAG با پاسخ طبیعی + footnote پاسخ داده شود</li>
+  <li>۹۳ تست واحد + ۸ تست live API سبز باشند</li>
   <li>حداقل ۱ issue در Jira ایجاد شود</li>
   <li>UI کاملاً فارسی و RTL باشد</li>
 </ul>

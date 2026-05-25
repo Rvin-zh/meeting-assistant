@@ -26,7 +26,7 @@ class TestIsSmallTalk:
 class TestAskMeeting:
     @pytest.mark.asyncio
     async def test_hello_uses_chitchat_no_sources(self, tmp_data_dirs):
-        store = VectorStore(tmp_data_dirs["vectors"], FakeEmbeddingService())
+        store = VectorStore(tmp_data_dirs["chroma"], FakeEmbeddingService())
         mock_answer = RagAnswer(
             answer="سلام! درباره جلسه بپرسید.",
             sources=[],
@@ -47,10 +47,19 @@ class TestAskMeeting:
 
     @pytest.mark.asyncio
     async def test_meeting_question_injects_context(self, tmp_data_dirs):
-        store = VectorStore(tmp_data_dirs["vectors"], FakeEmbeddingService())
-        store._path("m2").write_text(
-            '{"meeting_id":"m2","chunks":[{"chunk_id":"c0","speaker":"Ali","text":"deadline Friday","embedding":[1,0,0,0,0,0,0,0]}]}',
-            encoding="utf-8",
+        store = VectorStore(tmp_data_dirs["chroma"], FakeEmbeddingService())
+        from backend.models.schemas import TranscriptChunk
+
+        await store.index_meeting(
+            "m2",
+            [
+                TranscriptChunk(
+                    chunk_id="c0",
+                    speaker="Ali",
+                    text="deadline Friday",
+                    turn_indices=[0],
+                )
+            ],
         )
 
         mock_answer = RagAnswer(
@@ -79,7 +88,7 @@ class TestAskMeeting:
 
     @pytest.mark.asyncio
     async def test_no_chunks_returns_not_found(self, tmp_data_dirs):
-        store = VectorStore(tmp_data_dirs["vectors"], FakeEmbeddingService())
+        store = VectorStore(tmp_data_dirs["chroma"], FakeEmbeddingService())
         answer = await ask_meeting("missing", "deadline?", store)
         assert "یافت نشد" in answer.answer
         assert answer.sources == []

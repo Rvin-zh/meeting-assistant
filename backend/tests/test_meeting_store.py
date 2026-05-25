@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 import pytest
 
 from backend.models.schemas import MeetingRecord
+from backend.services.database import connect
 from backend.services.meeting_store import MeetingStore
 from backend.tests.conftest import SAMPLE_ANALYSIS, SAMPLE_TRANSCRIPT
 
@@ -53,7 +55,10 @@ class TestSyntheticFiles:
             "backend.services.meeting_store.SYNTHETIC_DIR",
             tmp_data_dirs["synthetic"],
         )
-        store = MeetingStore(tmp_data_dirs["meetings"])
+        store = MeetingStore(
+            tmp_data_dirs["db"],
+            legacy_json_dir=tmp_data_dirs["legacy"],
+        )
         items = store.list_synthetic()
         assert len(items) == 1
         assert items[0]["id"] == "demo-meeting"
@@ -65,7 +70,10 @@ class TestSyntheticFiles:
             "backend.services.meeting_store.SYNTHETIC_DIR",
             tmp_data_dirs["synthetic"],
         )
-        store = MeetingStore(tmp_data_dirs["meetings"])
+        store = MeetingStore(
+            tmp_data_dirs["db"],
+            legacy_json_dir=tmp_data_dirs["legacy"],
+        )
         text = store.load_synthetic("demo-meeting")
         assert "علی" in text
 
@@ -76,9 +84,58 @@ class TestSyntheticFiles:
             "backend.services.meeting_store.SYNTHETIC_DIR",
             tmp_data_dirs["synthetic"],
         )
-        store = MeetingStore(tmp_data_dirs["meetings"])
+        store = MeetingStore(
+            tmp_data_dirs["db"],
+            legacy_json_dir=tmp_data_dirs["legacy"],
+        )
         with pytest.raises(FileNotFoundError):
             store.load_synthetic("no-such-file")
+
+
+class TestLegacyJsonMigration:
+    def test_migrates_json_files_once(self, tmp_data_dirs: dict[str, Path]) -> None:
+        legacy = tmp_data_dirs["legacy"]
+        record = MeetingRecord(
+            id="legacy01",
+            title="قدیمی",
+            transcript=SAMPLE_TRANSCRIPT,
+            analysis=SAMPLE_ANALYSIS,
+            created_at="2026-01-01T00:00:00+00:00",
+        )
+        (legacy / "legacy01.json").write_text(
+            record.model_dump_json(), encoding="utf-8"
+        )
+
+        store = MeetingStore(
+            tmp_data_dirs["db"],
+            legacy_json_dir=legacy,
+        )
+        loaded = store.get("legacy01")
+        assert loaded is not None
+        assert loaded.analysis.summary == SAMPLE_ANALYSIS.summary
+
+        store2 = MeetingStore(
+            tmp_data_dirs["db"],
+            legacy_json_dir=legacy,
+        )
+        assert len(store2.list_all()) == 1
+
+    def test_summary_stored_in_sqlite(self, meeting_store: MeetingStore) -> None:
+        record = MeetingRecord(
+            id="sum1",
+            title="t",
+            transcript=SAMPLE_TRANSCRIPT,
+            analysis=SAMPLE_ANALYSIS,
+            created_at="2026-01-01T00:00:00+00:00",
+        )
+        meeting_store.save(record)
+        with connect(meeting_store.db_path) as conn:
+            row = conn.execute(
+                "SELECT summary, key_points_json FROM meetings WHERE id = ?",
+                ("sum1",),
+            ).fetchone()
+        assert row["summary"] == SAMPLE_ANALYSIS.summary
+        assert "API deploy" in json.loads(row["key_points_json"])[0]
 
 
 class TestMeetingStoreHelpers:

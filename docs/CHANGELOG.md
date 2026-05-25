@@ -1,0 +1,34 @@
+# تاریخچه تغییرات — دستیار جلسه
+
+این فایل با **هر تغییر مهم** در کد یا معماری به‌روز می‌شود. اسناد HTML و spec باید هم‌راستا بمانند.
+
+| تاریخ | تغییر |
+|--------|--------|
+| ۱۴۰۵/۰۳/۰۶ | **SQLite:** جلسات و خلاصه‌ها در `data/meetings.db` (مهاجرت خودکار از `data/meetings/*.json`) |
+| ۱۴۰۵/۰۳/۰۶ | **ChromaDB** جایگزین JSON دستی + cosine در Python (`data/chroma/`) |
+| ۱۴۰۵/۰۳/۰۶ | **RAG هوشمند:** سلام/احوال‌پرسی بدون بازیابی transcript؛ پاسخ طبیعی + footnote کوتاه (نه dump متن خام) |
+| ۱۴۰۵/۰۳/۰۶ | **Jira انگلیسی:** `title_en` / `context_en` برای issueها (UI فارسی) |
+| ۱۴۰۵/۰۳/۰۶ | **صفحه جلسه SSR:** بارگذاری داده از سرور Astro (رفع گیر کردن «در حال بارگذاری») |
+| ۱۴۰۵/۰۳/۰۶ | **قانون Cursor:** `.cursor/rules/docs-on-change.mdc` — به‌روزرسانی خودکار اسناد با هر تغییر |
+| ۱۴۰۵/۰۳/۰۶ | **مستندات:** هم‌خوان‌سازی ۳ HTML + design spec + README با Chroma/RAG/Jira EN |
+| ۱۴۰۵/۰۳/۰۶ | Embedding: `gemini-embedding-001` |
+| ۱۴۰۵/۰۳/۰۵ | MVP اولیه: FastAPI + Pydantic AI + Astro RTL + Jira KAN |
+| ۱۴۰۵/۰۳/۰۵ | ۹۳ تست واحد + ۸ تست live API |
+| ۱۴۰۵/۰۳/۰۵ | انتشار GitHub: `Rvin-zh/meeting-assistant` |
+
+## اسناد مرتبط (همیشه هم‌خوان کنید)
+
+| سند | مخاطب |
+|-----|--------|
+| [پروژه-اصلی.html](پروژه-اصلی.html) | چشم‌انداز و معماری کل |
+| [پیاده-سازی.html](پیاده-سازی.html) | جزئیات فنی MVP |
+| [شرح-پروژه-دستیار-جلسه.html](شرح-پروژه-دستیار-جلسه.html) | دوره AI-native، RAG، تکلیف |
+| [superpowers/specs/2026-05-26-meeting-assistant-design.md](superpowers/specs/2026-05-26-meeting-assistant-design.md) | Spec مهندسی |
+
+## قانون نگهداری
+
+پس از هر PR یا تغییر معماری:
+
+1. یک خط به این CHANGELOG اضافه کنید.
+2. بخش مربوط در HTML/spec را به‌روز کنید.
+3. در صورت نیاز `README.md` را اصلاح کنید.
