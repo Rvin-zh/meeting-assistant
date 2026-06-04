@@ -273,6 +273,13 @@ textarea { min-height: 160px; resize: vertical; line-height: 1.65; }
 }
 .file-drop:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.06); }
 .file-drop input { display: none; }
+.voice-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
 
 /* Meeting grid */
 .meeting-grid {

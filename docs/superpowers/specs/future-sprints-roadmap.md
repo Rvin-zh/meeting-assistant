@@ -1,7 +1,7 @@
 # Future Sprints Roadmap — Meeting Assistant
 
 **Updated:** 2026-05-26  
-**Out of scope:** Speech-to-text (STT), live audio capture, voice pipelines
+**Out of scope (for now):** Live streaming STT during meetings, professional speaker diarization, separate Cloud Speech-to-Text pipeline. **In MVP:** upload/record audio → Gemini transcription via `POST /api/transcribe` (same `GOOGLE_API_KEY`).
 
 Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html) for the full Persian HTML version with diagrams.
 
@@ -34,14 +34,14 @@ Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نق
 
 ---
 
-## Sprint 4 — Users, orgs, integrations (no voice)
+## Sprint 4 — Users, orgs, integrations
 
 | Feature | Notes |
 |---------|--------|
 | Auth | JWT or OIDC (SSO) |
 | Workspaces | `org_id` tenancy on all data |
 | RBAC | admin / editor / viewer |
-| Calendar metadata | Google Calendar read-only → prefill meeting form (transcript still manual) |
+| Calendar metadata | Google Calendar read-only → prefill meeting form (transcript from text or voice upload) |
 | Email digest | RTL HTML summary to attendees |
 | Slack/Teams | Webhook notification after analysis |
 

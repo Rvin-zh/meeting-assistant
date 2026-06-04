@@ -21,6 +21,10 @@
     .cut { background: #fef2f2; border-right: 4px solid #dc2626; padding: 1rem; margin: 1rem 0; }
     .future { background: #fefce8; border-right: 4px solid #ca8a04; padding: 1rem; margin: 1rem 0; }
     .meta { color: var(--muted); font-size: 0.9rem; }
+    .screenshot-grid { display: grid; gap: 1.5rem; margin: 1.5rem 0; }
+    .screenshot-grid figure { margin: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #111; }
+    .screenshot-grid img { display: block; width: 100%; height: auto; }
+    .screenshot-grid figcaption { padding: 0.65rem 0.85rem; font-size: 0.88rem; color: var(--muted); background: var(--bg); border-top: 1px solid var(--border); }
   </style>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -40,7 +44,7 @@
 <h2>۲. MVP در برابر نسخه کامل (YAGNI)</h2>
 <table>
   <tr><th>قابلیت</th><th>نسخه کامل (سند اولیه)</th><th>MVP فعلی</th></tr>
-  <tr><td>ورودی</td><td>ضبط صوت زنده + STT</td><td>✅ transcript آماده (paste + upload)</td></tr>
+  <tr><td>ورودی</td><td>ضبط صوت زنده + STT streaming</td><td>✅ transcript (paste + فایل متنی) · ✅ <strong>صوت</strong> (آپلود/ضبط → Gemini)</td></tr>
   <tr><td>تحلیل</td><td>GPT-4 / مدل‌های متنوع</td><td>✅ Gemini Flash + Pydantic AI</td></tr>
   <tr><td>جستجو / Vector DB</td><td>ElasticSearch</td><td>✅ <strong>ChromaDB</strong> embedded (<span dir="ltr">data/chroma/</span>)</td></tr>
   <tr><td>تسک</td><td>Jira + Trello + Asana + …</td><td>✅ فقط Jira (<span dir="ltr">KAN</span>) — issueها <strong>انگلیسی</strong></td></tr>
@@ -56,12 +60,18 @@ sequenceDiagram
     participant U as کاربر
     participant UI as Astro RTL
     participant API as FastAPI
+    participant G as Gemini
     participant AA as analysis_agent
     participant RA as rag_agent
     participant C as ChromaDB
     participant J as Jira KAN
 
-    U->>UI: transcript / جلسه نمونه
+    U->>UI: transcript / صوت / جلسه نمونه
+    opt فایل یا ضبط صوتی
+        UI->>API: POST /api/transcribe
+        API->>G: Gemini audio → متن
+        API-->>UI: transcript
+    end
     UI->>API: POST /api/meetings
     API->>API: parse + chunk + embed
     API->>C: index chunks
@@ -76,6 +86,23 @@ sequenceDiagram
     UI->>API: POST /jira/create
     API->>J: issue جدید
 </pre>
+</div>
+
+<h2>۳.۵. رونویسی صوت (Voice — Gemini)</h2>
+<p>
+  ورود صوت <strong>جدا از ingest</strong> است تا paste متنی و جلسات نمونه بدون تغییر بمانند.
+  همان <code>GOOGLE_API_KEY</code> و <code>GEMINI_MODEL</code> — بدون سرویس Speech-to-Text جدا.
+</p>
+<table>
+  <tr><th>مرحله</th><th>جزئیات</th></tr>
+  <tr><td>UI</td><td>آپلود <span dir="ltr">mp3, wav, m4a, ogg, webm, flac</span> یا دکمه <strong>ضبط صوت</strong> (MediaRecorder)</td></tr>
+  <tr><td>API</td><td><span dir="ltr">POST /api/transcribe</span> — multipart <code>file</code> → Gemini <code>generateContent</code> با inline audio</td></tr>
+  <tr><td>خروجی</td><td>transcript فارسی با فرمت <code dir="ltr">[MM:SS] name: text</code> — قابل ویرایش قبل از تحلیل</td></tr>
+  <tr><td>محدودیت</td><td>حداکثر <span dir="ltr">20MB</span> (<code>MAX_AUDIO_BYTES</code>)</td></tr>
+  <tr><td>بعد از رونویسی</td><td>همان <span dir="ltr">POST /api/meetings</span> — analysis، Chroma، RAG، Jira</td></tr>
+</table>
+<div class="note">
+  <strong>تفاوت با STT حرفه‌ای:</strong> diarization و streaming زنده در MVP نیست؛ برای دمو و جلسات ضبط‌شده کافی است.
 </div>
 
 <h2>۴. SQLite — ذخیره جلسات و خلاصه</h2>
@@ -114,7 +141,7 @@ class MeetingAnalysis(BaseModel):
     tasks: list[MeetingTask]
 
 analysis_agent = Agent(
-    'google:gemini-2.5-flash',
+    'google:gemini-3.5-flash',
     output_type=MeetingAnalysis,
     system_prompt='تحلیل transcript جلسه فارسی. فقط بر اساس متن.',
 )</code></pre>
@@ -164,10 +191,39 @@ flowchart TB
 
 <p>صفحه <code dir="ltr">/meeting/[id]</code> داده را در <strong>سرور Astro</strong> از FastAPI می‌گیرد (نه فقط client JS) — رفع مشکل گیر کردن روی «در حال بارگذاری».</p>
 
+<div class="screenshot-grid">
+  <figure>
+    <img src="screenshots/home.png" alt="صفحه خانه — لیست جلسات، فیلتر، جلسات نمونه و فرم transcript" loading="lazy" />
+    <figcaption><strong>خانه</strong> — آرشیو جلسات، جستجو/فیلتر، جلسات مصنوعی، فرم ingest</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/meeting-summary.png" alt="صفحه جلسه — تب خلاصه" loading="lazy" />
+    <figcaption><strong>جلسه · خلاصه</strong> — نکات کلیدی، تصمیمات، آمار مشارکت</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/meeting-tasks.png" alt="صفحه جلسه — تب تسک‌ها و Jira" loading="lazy" />
+    <figcaption><strong>جلسه · تسک‌ها</strong> — action itemها، preview و ایجاد issue در Jira</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/meeting-rag.png" alt="صفحه جلسه — تب پرسش RAG" loading="lazy" />
+    <figcaption><strong>جلسه · پرسش</strong> — RAG با پاسخ طبیعی و منابع</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/tasks.png" alt="داشبورد تسک‌ها" loading="lazy" />
+    <figcaption><strong>تسک‌ها</strong> — داشبورد cross-meeting با فیلتر «فقط باز»</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/settings.png" alt="صفحه تنظیمات" loading="lazy" />
+    <figcaption><strong>تنظیمات</strong> — وضعیت API، نگاشت گوینده→Jira، راهنمای .env</figcaption>
+  </figure>
+</div>
+<p class="meta">اسکرین‌شات‌ها با <code dir="ltr">./scripts/capture-ui-screenshots.sh</code> (Playwright) — نیاز به backend + frontend در حال اجرا.</p>
+
 <h2>۸. API Endpoints</h2>
 <table>
   <tr><th>Method</th><th>Path</th><th>توضیح</th></tr>
   <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings</td><td>لیست جلسات</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/transcribe</td><td>رونویسی فایل صوتی با Gemini (همان API key)</td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings</td><td>ingest + analysis_agent</td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/ask</td><td>rag_agent</td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/preview</td><td>پیش‌نمایش issue</td></tr>
@@ -186,7 +242,8 @@ flowchart TB
 <h2>۱۰. تنظیمات محیط (.env)</h2>
 <pre><code>GOOGLE_API_KEY=...
 EMBEDDING_MODEL=gemini-embedding-001
-GEMINI_MODEL=google:gemini-2.5-flash
+GEMINI_MODEL=google:gemini-3.5-flash
+MAX_AUDIO_BYTES=20971520
 JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
 JIRA_PROJECT_KEY=KAN
 JIRA_EMAIL=your@email.com
@@ -199,7 +256,7 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 ├── backend/
 │   ├── main.py
 │   ├── agents/        # analysis_agent, rag_agent
-│   ├── services/      # sqlite meeting_store, chroma, jira, embed
+│   ├── services/      # sqlite, chroma, jira, embed, audio_transcribe
 │   └── models/
 ├── data/synthetic/    # جلسات نمونه
 ├── data/meetings.db   # SQLite — خلاصه و تسک‌ها
@@ -210,7 +267,7 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 <h2>۱۲. تست‌ها</h2>
 <table>
   <tr><th>نوع</th><th>دستور</th><th>تعداد</th></tr>
-  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۹۷</td></tr>
+  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۱۳۷</td></tr>
   <tr><td>live API</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۱۲ (HTTP + سرویس)</td></tr>
   <tr><td>همه</td><td dir="ltr">./scripts/run-all-tests.sh</td><td>واحد + live</td></tr>
 </table>
@@ -221,12 +278,14 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
   <tr><td>Gemini timeout</td><td>retry ×1 + پیام فارسی</td></tr>
   <tr><td>Transcript بدون speaker</td><td>برچسب [ناشناس]</td></tr>
   <tr><td>Jira 401</td><td>راهنمای بررسی .env</td></tr>
+  <tr><td>فایل صوتی نامعتبر / بزرگ</td><td>۴۰۰ فارسی — فرمت یا <code>MAX_AUDIO_BYTES</code></td></tr>
+  <tr><td>Gemini billing (403 dunning)</td><td>پیام فارسی راهنمای billing — رونویسی و تحلیل</td></tr>
   <tr><td>RAG بدون match</td><td>«در این جلسه یافت نشد»</td></tr>
 </table>
 
 <div class="future">
   <strong>اسپرینت‌های بعدی:</strong> <a href="نقشه-اسپرینت‌ها.html">نقشه کامل ایده‌ها</a> — Sprint 2: RAG چندجلسه + FTS آرشیو · Sprint 3: Jira assignee + OAuth · Sprint 4: auth/workspace + تقویم (metadata) · Sprint 5: PostgreSQL + queue + deploy · Sprint 6+: multi-agent، داشبورد تسک‌ها.<br>
-  <em>بدون STT / ضبط صوت.</em>
+  <em>STT زنده/streaming در roadmap نیست — رونویسی Gemini فعلی برای MVP کافی است.</em>
 </div>
 
 </body>

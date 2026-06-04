@@ -20,5 +20,6 @@ JIRA_SITE_URL = os.getenv("JIRA_SITE_URL", "https://arvinzaheri17.atlassian.net"
 JIRA_PROJECT_KEY = os.getenv("JIRA_PROJECT_KEY", "KAN")
 JIRA_EMAIL = os.getenv("JIRA_EMAIL", "")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "google:gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "google:gemini-3.5-flash")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
+MAX_AUDIO_BYTES = int(os.getenv("MAX_AUDIO_BYTES", str(20 * 1024 * 1024)))

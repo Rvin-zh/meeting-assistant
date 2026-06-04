@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="خانه — دستیار جلسه">
   <section class="hero">
     <h1>دستیار جلسه سازمانی</h1>
-    <p>transcript فارسی را به خلاصه، تسک، پرسش هوشمند و issue در Jira تبدیل کنید.</p>
+    <p>transcript فارسی یا فایل/ضبط صوتی را به خلاصه، تسک، پرسش هوشمند و issue در Jira تبدیل کنید.</p>
     <div id="status-pills" class="status-pills"></div>
   </section>
 
@@ -43,7 +43,7 @@ import Layout from '../layouts/Layout.astro';
 
   <section class="card">
     <h2>transcript جدید</h2>
-    <p class="muted">فرمت: <code dir="ltr">[۱۴:۰۲] نام: متن</code></p>
+    <p class="muted">متن، فایل متنی، یا صوت — فرمت متن: <code dir="ltr">[۱۴:۰۲] نام: متن</code></p>
     <form id="upload-form">
       <div class="grid-2" style="margin-bottom: 0.75rem;">
         <div>
@@ -68,9 +68,13 @@ import Layout from '../layouts/Layout.astro';
       <label for="transcript">متن جلسه</label>
       <textarea id="transcript" name="transcript" placeholder="[۰۹:۰۰] علی: صبح بخیر…"></textarea>
       <label class="file-drop" for="file-input">
-        <input type="file" id="file-input" accept=".txt,.vtt,.srt" />
-        📎 کلیک یا فایل .txt / .vtt / .srt را اینجا بکشید
+        <input type="file" id="file-input" accept=".txt,.vtt,.srt,.mp3,.wav,.m4a,.aac,.ogg,.flac,.webm,audio/*" />
+        📎 فایل متن (.txt) یا صوت (.mp3, .wav, .webm, …)
       </label>
+      <div class="voice-row">
+        <button type="button" class="btn btn-outline btn-sm" id="record-btn">🎙 ضبط صوت</button>
+        <span id="record-status" class="muted" style="font-size:0.88rem"></span>
+      </div>
       <button class="btn" type="submit" id="submit-btn" style="margin-top: 1rem; width: 100%;">
         تحلیل جلسه با Gemini
       </button>
@@ -81,7 +85,7 @@ import Layout from '../layouts/Layout.astro';
 <div id="loading" class="loading-overlay hidden" aria-live="polite">
   <div class="loading-box">
     <div class="spinner"></div>
-    <p>در حال تحلیل جلسه…</p>
+    <p id="loading-message">در حال تحلیل جلسه…</p>
     <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">چند ثانیه تا یک دقیقه</p>
   </div>
 </div>
@@ -98,16 +102,79 @@ import Layout from '../layouts/Layout.astro';
   const filterType = document.getElementById('filter-type') as HTMLSelectElement;
   const filterProject = document.getElementById('filter-project') as HTMLInputElement;
   const filterTag = document.getElementById('filter-tag') as HTMLInputElement;
+  const loadingMessage = document.getElementById('loading-message')!;
+  const recordBtn = document.getElementById('record-btn') as HTMLButtonElement;
+  const recordStatus = document.getElementById('record-status')!;
+
+  const AUDIO_EXT = /\.(mp3|wav|m4a|aac|ogg|flac|webm)$/i;
+
+  let mediaRecorder: MediaRecorder | null = null;
+  let recordChunks: BlobPart[] = [];
+  let recordStream: MediaStream | null = null;
 
   function showError(msg: string) {
     errorEl.textContent = msg;
     errorEl.classList.remove('hidden');
   }
 
-  function setLoading(on: boolean) {
+  function setLoading(on: boolean, message = 'در حال تحلیل جلسه…') {
     loadingEl.classList.toggle('hidden', !on);
+    loadingMessage.textContent = message;
     (document.getElementById('submit-btn') as HTMLButtonElement).disabled = on;
+    recordBtn.disabled = on;
   }
+
+  async function transcribeFile(file: File) {
+    setLoading(true, 'در حال تبدیل صوت به متن با Gemini…');
+    errorEl.classList.add('hidden');
+    try {
+      const result = await api.transcribeAudio(file, file.name);
+      (document.getElementById('transcript') as HTMLTextAreaElement).value = result.transcript;
+      recordStatus.textContent = 'رونویسی انجام شد — متن را بررسی کنید و تحلیل را بزنید.';
+    } catch (e) {
+      showError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function stopRecordStream() {
+    recordStream?.getTracks().forEach((t) => t.stop());
+    recordStream = null;
+  }
+
+  recordBtn.addEventListener('click', async () => {
+    if (mediaRecorder?.state === 'recording') {
+      mediaRecorder.stop();
+      return;
+    }
+    errorEl.classList.add('hidden');
+    try {
+      recordStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordChunks = [];
+      mediaRecorder = new MediaRecorder(recordStream);
+      mediaRecorder.ondataavailable = (ev) => {
+        if (ev.data.size > 0) recordChunks.push(ev.data);
+      };
+      mediaRecorder.onstop = async () => {
+        recordBtn.textContent = '🎙 ضبط صوت';
+        recordStatus.textContent = '';
+        stopRecordStream();
+        const blob = new Blob(recordChunks, { type: mediaRecorder?.mimeType || 'audio/webm' });
+        if (!blob.size) {
+          showError('ضبط خالی بود — دوباره تلاش کنید.');
+          return;
+        }
+        await transcribeFile(new File([blob], 'recording.webm', { type: blob.type }));
+      };
+      mediaRecorder.start();
+      recordBtn.textContent = '⏹ توقف ضبط';
+      recordStatus.textContent = 'در حال ضبط…';
+    } catch {
+      showError('دسترسی به میکروفون ممکن نیست — از آپلود فایل صوتی استفاده کنید.');
+      stopRecordStream();
+    }
+  });
 
   async function loadHealth() {
     const pills = document.getElementById('status-pills')!;
@@ -213,6 +280,11 @@ import Layout from '../layouts/Layout.astro';
   document.getElementById('file-input')?.addEventListener('change', async (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
+    errorEl.classList.add('hidden');
+    if (AUDIO_EXT.test(file.name) || file.type.startsWith('audio/')) {
+      await transcribeFile(file);
+      return;
+    }
     const text = await file.text();
     (document.getElementById('transcript') as HTMLTextAreaElement).value = text;
   });

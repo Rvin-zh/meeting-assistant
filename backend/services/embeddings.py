@@ -4,6 +4,7 @@ from typing import Sequence
 import httpx
 
 from backend.config import EMBEDDING_MODEL, GOOGLE_API_KEY
+from backend.services.gemini_errors import raise_for_gemini_response
 
 
 class EmbeddingService:
@@ -29,7 +30,7 @@ class EmbeddingService:
                         "taskType": task_type,
                     },
                 )
-                response.raise_for_status()
+                raise_for_gemini_response(response)
                 payload = response.json()
                 embedding = payload.get("embedding", {}).get("values")
                 if not embedding:

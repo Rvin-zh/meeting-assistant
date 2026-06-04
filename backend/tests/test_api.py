@@ -152,6 +152,52 @@ class TestCreateMeeting:
             response = client.post("/api/meetings", json={"transcript": "x"})
         assert response.status_code == 400
 
+    def test_create_gemini_dunning_403(self, client: TestClient):
+        from pydantic_ai.exceptions import ModelHTTPError
+
+        dunning = ModelHTTPError(
+            status_code=403,
+            model_name="gemini-2.5-flash",
+            body={
+                "error": {
+                    "code": 403,
+                    "message": "Lightning dunning decision is deny for project: projects/390415010751",
+                    "status": "PERMISSION_DENIED",
+                }
+            },
+        )
+        with patch(
+            "backend.main.ingest_meeting",
+            new=AsyncMock(side_effect=dunning),
+        ):
+            response = client.post("/api/meetings", json={"transcript": "x"})
+        assert response.status_code == 403
+        assert "billing" in response.json()["detail"]
+        assert "status_code:" not in response.json()["detail"]
+
+    def test_ask_gemini_dunning_403(self, client: TestClient, sample_record):
+        from pydantic_ai.exceptions import ModelHTTPError
+
+        dunning = ModelHTTPError(
+            status_code=403,
+            model_name="gemini-2.5-flash",
+            body={
+                "error": {
+                    "message": "Lightning dunning decision is deny for project: projects/390415010751",
+                }
+            },
+        )
+        with patch(
+            "backend.main.ask_meeting",
+            new=AsyncMock(side_effect=dunning),
+        ):
+            response = client.post(
+                f"/api/meetings/{sample_record.id}/ask",
+                json={"question": "deadline?"},
+            )
+        assert response.status_code == 403
+        assert "billing" in response.json()["detail"]
+
 
 class TestSyntheticEndpoint:
     def test_synthetic_not_found(self, client: TestClient):

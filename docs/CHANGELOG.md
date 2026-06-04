@@ -4,7 +4,8 @@
 
 | تاریخ | تغییر |
 |--------|--------|
-| ۱۴۰۵/۰۳/۰۶ | **PDF/SVG:** `scripts/export-docs.sh` — HTML→PDF (Playwright RTL) + Mermaid→SVG |
+| ۱۴۰۵/۰۳/۰۶ | **Docs:** به‌روزرسانی HTML/spec/README — پشتیبانی voice با Gemini در MVP |
+| ۱۴۰۵/۰۳/۰۶ | **Voice (Gemini):** `POST /api/transcribe` — آپلود/ضبط صوت → transcript؛ ingest متنی بدون تغییر |
 | ۱۴۰۵/۰۳/۰۶ | **Sprint 2/3 lite:** برچسب/پروژه، فیلتر، داشبورد تسک‌ها، قالب تحلیل، نگاشت Jira |
 | ۱۴۰۵/۰۳/۰۶ | **Sprint 3 lite:** نگاشت گوینده→Jira assignee، ذخیره jira_key، آمار مشارکت، حذف جلسه |
 | ۱۴۰۵/۰۳/۰۶ | **نقشه اسپرینت:** `docs/نقشه-اسپرینت‌ها.html` + `future-sprints-roadmap.md` (بدون STT) |
