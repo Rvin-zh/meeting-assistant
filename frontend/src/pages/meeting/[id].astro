@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { MEETING_TYPE_LABELS } from '../../lib/api';
 
 export const prerender = false;
 
@@ -29,85 +30,162 @@ const analysis = meeting?.analysis as {
   summary: string;
   key_points: string[];
   decisions: string[];
-  tasks: { title: string; assignee?: string; deadline?: string; priority: string }[];
+  tasks: {
+    title: string;
+    title_en?: string;
+    assignee?: string;
+    deadline?: string;
+    priority: string;
+    jira_key?: string;
+  }[];
 } | undefined;
+
+const tags = (meeting?.tags as string[]) ?? [];
+const projectKey = (meeting?.project_key as string) ?? '';
+
+const meetingType = (meeting?.meeting_type as string) ?? 'general';
+const typeLabel = MEETING_TYPE_LABELS[meetingType as keyof typeof MEETING_TYPE_LABELS] ?? meetingType;
+const taskCount = analysis?.tasks?.length ?? 0;
+const exportUrl = meeting ? `${backendUrl}/api/meetings/${meeting.id}/export` : '#';
 ---
 
-<Layout title="جلسه — دستیار جلسه">
+<Layout title={meeting ? `${meeting.title as string} — دستیار جلسه` : 'جلسه'}>
   {loadError && (
     <div class="card alert alert-error">
       <p>{loadError}</p>
-      <p style="margin-top:0.75rem"><a href="/">بازگشت به خانه</a></p>
+      <a href="/" class="btn btn-outline" style="margin-top:1rem;display:inline-flex">بازگشت به خانه</a>
     </div>
   )}
 
-  {meeting && (
+  {meeting && analysis && (
     <div id="meeting-app" data-meeting-id={meeting.id as string}>
-      <h1>{meeting.title as string}</h1>
-      <p class="muted">شناسه: {meeting.id as string} · منبع: {meeting.source as string}</p>
+      <div class="meeting-header">
+        <span class="badge badge-type">{typeLabel}</span>
+        <h1>{meeting.title as string}</h1>
+        <p class="muted">شناسه: <code dir="ltr">{meeting.id as string}</code> · {new Date(meeting.created_at as string).toLocaleString('fa-IR')}</p>
+        <div class="meeting-actions">
+          <a href={exportUrl} class="btn btn-outline btn-sm" download>دانلود Markdown</a>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-copy-summary">کپی خلاصه</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-delete" style="color:var(--danger)">حذف جلسه</button>
+          <a href="/" class="btn btn-ghost btn-sm">خانه</a>
+        </div>
+        {(tags.length > 0 || projectKey) && (
+          <div class="meta-row" style="margin-top:0.75rem">
+            {projectKey && <span class="badge badge-type" dir="ltr">{projectKey}</span>}
+            {tags.map((t) => <span class="badge badge-type">{t}</span>)}
+          </div>
+        )}
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><div class="num">{taskCount}</div><div class="lbl">تسک</div></div>
+        <div class="stat"><div class="num">{analysis.key_points?.length ?? 0}</div><div class="lbl">نکته کلیدی</div></div>
+        <div class="stat"><div class="num">{analysis.decisions?.length ?? 0}</div><div class="lbl">تصمیم</div></div>
+      </div>
 
       <div id="error" class="alert alert-error hidden"></div>
       <div id="success" class="alert alert-success hidden"></div>
 
-      <div class="tabs">
+      <div class="tabs" role="tablist">
         <button class="tab active" data-tab="summary" type="button">خلاصه</button>
-        <button class="tab" data-tab="tasks" type="button">تسک‌ها</button>
-        <button class="tab" data-tab="rag" type="button">پرسش از جلسه</button>
+        <button class="tab" data-tab="tasks" type="button">تسک‌ها ({taskCount})</button>
+        <button class="tab" data-tab="rag" type="button">پرسش</button>
       </div>
 
       <section id="panel-summary" class="card tab-panel">
-        <h2>خلاصه</h2>
-        <p id="summary-text">{analysis?.summary}</p>
-        <h2 style="margin-top:1rem">نکات کلیدی</h2>
-        <ul>
-          {analysis?.key_points?.length
+        <h2>خلاصه جلسه</h2>
+        <div class="summary-box" id="summary-text">{analysis.summary}</div>
+        <h2 style="margin-top:1.5rem">نکات کلیدی</h2>
+        <ul class="point-list">
+          {analysis.key_points?.length
             ? analysis.key_points.map((p) => <li>{p}</li>)
             : <li class="muted">—</li>}
         </ul>
-        <h2>تصمیمات</h2>
-        <ul>
-          {analysis?.decisions?.length
+        <h2 style="margin-top:1.25rem">تصمیمات</h2>
+        <ul class="point-list">
+          {analysis.decisions?.length
             ? analysis.decisions.map((d) => <li>{d}</li>)
             : <li class="muted">—</li>}
         </ul>
+
+        <div class="meta-edit">
+          <h2>برچسب و پروژه</h2>
+          <label for="edit-tags">برچسب‌ها (با کاما)</label>
+          <input id="edit-tags" type="text" value={tags.join(', ')} />
+          <label for="edit-project">کلید پروژه</label>
+          <input id="edit-project" type="text" dir="ltr" value={projectKey} placeholder="KAN" />
+          <button type="button" class="btn btn-outline btn-sm" id="btn-save-meta">ذخیره</button>
+        </div>
+
+        <h2 style="margin-top:1.5rem">مشارکت گویندگان</h2>
+        <div id="speaker-stats"><p class="muted">در حال بارگذاری…</p></div>
       </section>
 
       <section id="panel-tasks" class="card tab-panel hidden">
-        <h2>تسک‌های استخراج‌شده</h2>
-        {analysis?.tasks?.length ? (
-          <table>
-            <thead>
-              <tr><th>عنوان</th><th>مسئول</th><th>مهلت</th><th>اولویت</th></tr>
-            </thead>
-            <tbody>
-              {analysis.tasks.map((t) => (
+        <div class="card-header">
+          <div>
+            <h2>تسک‌های استخراج‌شده</h2>
+            <p class="muted">تسک‌های انتخاب‌شده به Jira (انگلیسی) ارسال می‌شوند</p>
+          </div>
+        </div>
+        {analysis.tasks?.length ? (
+          <>
+            <table class="task-table">
+              <thead>
                 <tr>
-                  <td>{t.title}</td>
-                  <td>{t.assignee ?? '—'}</td>
-                  <td>{t.deadline ?? '—'}</td>
-                  <td><span class="badge">{t.priority}</span></td>
+                  <th style="width:2.5rem"><input type="checkbox" id="select-all-tasks" checked title="انتخاب همه" /></th>
+                  <th>عنوان</th>
+                  <th>مسئول</th>
+                  <th>مهلت</th>
+                  <th>اولویت</th>
+                  <th>Jira</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {analysis.tasks.map((t, i) => (
+                  <tr data-task-index={i}>
+                    <td><input type="checkbox" class="task-cb" data-index={i} checked={!t.jira_key} disabled={!!t.jira_key} /></td>
+                    <td>
+                      <strong>{t.title}</strong>
+                      {t.title_en && <div class="muted" style="font-size:0.8rem;margin-top:0.2rem" dir="ltr">{t.title_en}</div>}
+                    </td>
+                    <td>{t.assignee ?? '—'}</td>
+                    <td>{t.deadline ?? '—'}</td>
+                    <td>
+                      <span class={`badge badge-${t.priority}`}>{t.priority === 'high' ? 'بالا' : t.priority === 'low' ? 'پایین' : 'متوسط'}</span>
+                    </td>
+                    <td>{t.jira_key ? <code dir="ltr">{t.jira_key}</code> : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div class="jira-panel">
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="btn btn-outline btn-sm" id="btn-preview" type="button">پیش‌نمایش Jira</button>
+                <button class="btn btn-sm" id="btn-jira" type="button">ارسال انتخاب‌شده‌ها</button>
+              </div>
+              <pre id="jira-preview" class="ltr hidden"></pre>
+            </div>
+          </>
         ) : (
           <p class="muted">تسکی استخراج نشد.</p>
         )}
-        <p class="muted" style="margin-top:0.5rem">تسک‌ها در Jira به انگلیسی ثبت می‌شوند (خواناتر در رابط LTR).</p>
-        <div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
-          <button class="btn btn-outline" id="btn-preview" type="button">پیش‌نمایش Jira (English)</button>
-          <button class="btn" id="btn-jira" type="button">ارسال به Jira</button>
-        </div>
-        <pre id="jira-preview" class="ltr hidden" style="margin-top:1rem; background:#f1f5f9; padding:1rem; border-radius:8px; overflow:auto;"></pre>
       </section>
 
       <section id="panel-rag" class="card tab-panel hidden">
-        <h2>پرسش از جلسه (RAG)</h2>
-        <p class="muted">سوال درباره محتوای جلسه بپرسید. سلام و احوال‌پرسی بدون نمایش transcript پاسخ داده می‌شود.</p>
-        <div id="chat" class="chat-box"></div>
-        <form id="ask-form" style="margin-top:1rem; display:flex; gap:0.5rem;">
-          <input id="question" type="text" placeholder="مثلاً: deadline release چیست؟" />
-          <button class="btn" type="submit">بپرس</button>
+        <h2>پرسش از جلسه</h2>
+        <p class="muted">سوال درباره محتوا بپرسید. «سلام» بدون جستجو در transcript پاسخ داده می‌شود.</p>
+        <div class="suggest-chips">
+          <button type="button" class="chip suggest-q">مهم‌ترین تصمیمات چیست؟</button>
+          <button type="button" class="chip suggest-q">deadlineها کی هستند؟</button>
+          <button type="button" class="chip suggest-q">چه کسی مسئول چیست؟</button>
+        </div>
+        <div id="chat" class="chat-box">
+          <div class="chat-empty">اولین سوال را بپرسید…</div>
+        </div>
+        <form id="ask-form" class="ask-form">
+          <input id="question" type="text" placeholder="سوال خود را بنویسید…" autocomplete="off" />
+          <button class="btn" type="submit" id="ask-btn">بپرس</button>
         </form>
       </section>
     </div>
@@ -115,57 +193,73 @@ const analysis = meeting?.analysis as {
 </Layout>
 
 <script>
+  import { api } from '../../lib/api';
+
   const app = document.getElementById('meeting-app');
-  if (!app) {
-    // error state only — nothing to wire up
-  } else {
-    const meetingId = app.dataset.meetingId;
+  if (app) {
+    const meetingId = app.dataset.meetingId!;
     const errorEl = document.getElementById('error');
     const successEl = document.getElementById('success');
+    const chat = document.getElementById('chat')!;
 
-    function showError(msg) {
-      if (!errorEl) return;
-      errorEl.textContent = msg;
-      errorEl.classList.remove('hidden');
+    function showError(msg: string) {
+      if (errorEl) {
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
+      }
     }
 
-    function showSuccess(msg) {
-      if (!successEl) return;
-      successEl.textContent = msg;
-      successEl.classList.remove('hidden');
+    function showSuccess(msg: string) {
+      if (successEl) {
+        successEl.textContent = msg;
+        successEl.classList.remove('hidden');
+        setTimeout(() => successEl.classList.add('hidden'), 6000);
+      }
     }
 
-    function switchTab(name) {
+    function switchTab(name: string) {
       document.querySelectorAll('.tab').forEach((t) => {
-        t.classList.toggle('active', t.dataset.tab === name);
+        t.classList.toggle('active', (t as HTMLElement).dataset.tab === name);
       });
       document.querySelectorAll('.tab-panel').forEach((p) => p.classList.add('hidden'));
       document.getElementById(`panel-${name}`)?.classList.remove('hidden');
     }
 
     document.querySelectorAll('.tab').forEach((tab) => {
-      tab.addEventListener('click', () => switchTab(tab.dataset.tab ?? 'summary'));
+      tab.addEventListener('click', () => switchTab((tab as HTMLElement).dataset.tab ?? 'summary'));
     });
 
-    async function apiPost(path, body) {
-      const res = await fetch(path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail ?? 'خطای سرور');
+    document.getElementById('btn-copy-summary')?.addEventListener('click', async () => {
+      const text = document.getElementById('summary-text')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        showSuccess('خلاصه در clipboard کپی شد');
+      } catch {
+        showError('کپی ناموفق بود');
       }
-      return res.json();
+    });
+
+    function getSelectedTaskIndices(): number[] {
+      return Array.from(document.querySelectorAll<HTMLInputElement>('.task-cb:checked'))
+        .map((cb) => parseInt(cb.dataset.index ?? '0', 10))
+        .filter((n) => !Number.isNaN(n));
     }
+
+    const selectAll = document.getElementById('select-all-tasks') as HTMLInputElement | null;
+    selectAll?.addEventListener('change', () => {
+      document.querySelectorAll<HTMLInputElement>('.task-cb').forEach((cb) => {
+        cb.checked = selectAll.checked;
+      });
+    });
 
     document.getElementById('btn-preview')?.addEventListener('click', async () => {
       try {
-        const preview = await apiPost(`/api/meetings/${meetingId}/jira/preview`, {});
+        const preview = await api.jiraPreview(meetingId);
+        const indices = getSelectedTaskIndices();
+        const filtered = preview.issues.filter((i) => indices.includes(i.task_index));
         const pre = document.getElementById('jira-preview');
         if (pre) {
-          pre.textContent = JSON.stringify(preview.issues, null, 2);
+          pre.textContent = JSON.stringify(filtered.length ? filtered : preview.issues, null, 2);
           pre.classList.remove('hidden');
         }
       } catch (e) {
@@ -174,42 +268,127 @@ const analysis = meeting?.analysis as {
     });
 
     document.getElementById('btn-jira')?.addEventListener('click', async () => {
+      const indices = getSelectedTaskIndices();
+      if (!indices.length) {
+        showError('حداقل یک تسک انتخاب کنید');
+        return;
+      }
+      const btn = document.getElementById('btn-jira') as HTMLButtonElement;
+      btn.disabled = true;
       try {
-        const result = await apiPost(`/api/meetings/${meetingId}/jira/create`, {});
-        showSuccess(`ایجاد شد: ${result.created.map((c) => c.key).join(', ')}`);
+        const result = await api.jiraCreate(meetingId, indices);
+        showSuccess(`ایجاد شد: ${result.created.map((c) => c.key).join(' · ')}`);
+        setTimeout(() => location.reload(), 1500);
+      } catch (e) {
+        showError(String(e));
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('btn-save-meta')?.addEventListener('click', async () => {
+      const tagsRaw = (document.getElementById('edit-tags') as HTMLInputElement).value;
+      const project_key = (document.getElementById('edit-project') as HTMLInputElement).value;
+      const tags = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean);
+      try {
+        await api.updateMeeting(meetingId, { tags, project_key });
+        showSuccess('ذخیره شد');
+        setTimeout(() => location.reload(), 800);
       } catch (e) {
         showError(String(e));
       }
     });
 
-    document.getElementById('ask-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const input = document.getElementById('question');
-      const q = input?.value.trim();
-      if (!q) return;
-      const chat = document.getElementById('chat');
-      if (chat) chat.innerHTML += `<div class="chat-msg"><strong>شما:</strong> ${q}</div>`;
-      if (input) input.value = '';
+    document.getElementById('btn-delete')?.addEventListener('click', async () => {
+      if (!confirm('این جلسه حذف شود؟')) return;
       try {
-        const ans = await apiPost(`/api/meetings/${meetingId}/ask`, { question: q });
+        await api.deleteMeeting(meetingId);
+        window.location.href = '/';
+      } catch (e) {
+        showError(String(e));
+      }
+    });
+
+    async function loadSpeakers() {
+      const el = document.getElementById('speaker-stats');
+      if (!el) return;
+      try {
+        const stats = await api.getSpeakers(meetingId);
+        if (!stats.length) {
+          el.innerHTML = '<p class="muted">—</p>';
+          return;
+        }
+        el.innerHTML = stats
+          .map(
+            (s) => `
+          <div class="speaker-bar">
+            <span style="min-width:4rem">${escapeHtml(s.speaker)}</span>
+            <div class="bar"><div class="fill" style="width:${s.percent}%"></div></div>
+            <span class="muted">${s.percent}% · ${s.turns} نوبت</span>
+          </div>`
+          )
+          .join('');
+      } catch {
+        el.innerHTML = '<p class="muted">—</p>';
+      }
+    }
+    loadSpeakers();
+
+    function appendChat(role: 'user' | 'assistant' | 'error', html: string) {
+      const empty = chat.querySelector('.chat-empty');
+      if (empty) empty.remove();
+      const div = document.createElement('div');
+      div.className = `chat-msg ${role}`;
+      div.innerHTML = html;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendQuestion(q: string) {
+      if (!q.trim()) return;
+      appendChat('user', escapeHtml(q));
+      const askBtn = document.getElementById('ask-btn') as HTMLButtonElement;
+      askBtn.disabled = true;
+      try {
+        const ans = await api.ask(meetingId, q);
         let footnotes = '';
         if (ans.used_meeting_context && ans.sources?.length) {
           const cites = ans.sources
             .map((s) => {
               const quote = s.excerpt || s.text || '';
               return quote
-                ? `<span class="cite-item"><strong>${s.speaker}</strong>: ${quote}</span>`
-                : `<span class="cite-item"><strong>${s.speaker}</strong></span>`;
+                ? `<span class="cite-item"><strong>${escapeHtml(s.speaker)}</strong>: ${escapeHtml(quote)}</span>`
+                : `<span class="cite-item"><strong>${escapeHtml(s.speaker)}</strong></span>`;
             })
             .join('');
           footnotes = `<div class="cite-footnotes">منابع: ${cites}</div>`;
         }
-        if (chat) {
-          chat.innerHTML += `<div class="chat-msg assistant"><strong>دستیار:</strong><p>${ans.answer}</p>${footnotes}</div>`;
-        }
+        appendChat('assistant', `<p>${escapeHtml(ans.answer)}</p>${footnotes}`);
       } catch (err) {
-        if (chat) chat.innerHTML += `<div class="chat-msg alert-error">${err}</div>`;
+        appendChat('error', escapeHtml(String(err)));
+      } finally {
+        askBtn.disabled = false;
       }
+    }
+
+    function escapeHtml(s: string) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    }
+
+    document.getElementById('ask-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('question') as HTMLInputElement;
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      await sendQuestion(q);
+    });
+
+    document.querySelectorAll('.suggest-q').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const q = chip.textContent ?? '';
+        sendQuestion(q);
+      });
     });
   }
 </script>

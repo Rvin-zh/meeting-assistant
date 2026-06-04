@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="تسک‌ها — دستیار جلسه">
+  <section class="hero" style="padding-top:1rem">
+    <h1>داشبورد تسک‌ها</h1>
+    <p>همه action itemها از تمام جلسات — یک نگاه کلی</p>
+  </section>
+
+  <div id="error" class="alert alert-error hidden"></div>
+
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>لیست تسک‌ها</h2>
+        <p class="muted" id="task-count">در حال بارگذاری…</p>
+      </div>
+      <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.9rem;cursor:pointer">
+        <input type="checkbox" id="open-only" />
+        فقط باز (بدون Jira)
+      </label>
+    </div>
+    <div id="tasks-table-wrap"></div>
+  </section>
+</Layout>
+
+<script>
+  import { api, formatDate, priorityLabel, escapeHtml } from '../lib/api';
+  import { MEETING_TYPE_LABELS } from '../lib/api';
+  import type { MeetingType } from '../lib/api';
+
+  const errorEl = document.getElementById('error')!;
+  const wrap = document.getElementById('tasks-table-wrap')!;
+  const countEl = document.getElementById('task-count')!;
+  const openOnlyEl = document.getElementById('open-only') as HTMLInputElement;
+
+  function showError(msg: string) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
+
+  async function loadTasks() {
+    try {
+      const items = await api.listTasks(openOnlyEl.checked);
+      countEl.textContent = `${items.length} تسک`;
+      if (!items.length) {
+        wrap.innerHTML = '<p class="muted">تسکی یافت نشد. ابتدا یک جلسه تحلیل کنید.</p>';
+        return;
+      }
+      wrap.innerHTML = `
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>تسک</th>
+              <th>جلسه</th>
+              <th>مسئول</th>
+              <th>مهلت</th>
+              <th>اولویت</th>
+              <th>Jira</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items
+              .map((t) => {
+                const type = MEETING_TYPE_LABELS[(t.meeting_type ?? 'general') as MeetingType];
+                const jiraCell = t.jira_key
+                  ? `<code dir="ltr">${escapeHtml(t.jira_key)}</code>`
+                  : '<span class="muted">—</span>';
+                return `<tr>
+                  <td><strong>${escapeHtml(t.title)}</strong></td>
+                  <td>
+                    <a href="/meeting/${t.meeting_id}">${escapeHtml(t.meeting_title)}</a>
+                    <div class="muted" style="font-size:0.78rem">${type}${t.project_key ? ' · ' + escapeHtml(t.project_key) : ''}</div>
+                  </td>
+                  <td>${escapeHtml(t.assignee ?? '—')}</td>
+                  <td>${escapeHtml(t.deadline ?? '—')}</td>
+                  <td><span class="badge badge-${t.priority}">${priorityLabel(t.priority)}</span></td>
+                  <td>${jiraCell}</td>
+                </tr>`;
+              })
+              .join('')}
+          </tbody>
+        </table>`;
+    } catch (e) {
+      showError(String(e));
+    }
+  }
+
+  openOnlyEl.addEventListener('change', loadTasks);
+  loadTasks();
+</script>

@@ -13,6 +13,7 @@ class MeetingTask(BaseModel):
     priority: Literal["high", "medium", "low"] = "medium"
     context: str = ""
     context_en: str = ""
+    jira_key: str | None = None
 
 
 class MeetingAnalysis(BaseModel):
@@ -50,6 +51,9 @@ class TranscriptChunk(BaseModel):
     turn_indices: list[int]
 
 
+MeetingType = Literal["general", "standup", "planning", "review"]
+
+
 class MeetingRecord(BaseModel):
     id: str
     title: str
@@ -57,11 +61,50 @@ class MeetingRecord(BaseModel):
     analysis: MeetingAnalysis
     created_at: str
     source: str = "upload"
+    meeting_type: MeetingType = "general"
+    tags: list[str] = Field(default_factory=list)
+    project_key: str = ""
 
 
 class CreateMeetingRequest(BaseModel):
     transcript: str
     title: str | None = None
+    meeting_type: MeetingType = "general"
+    tags: list[str] = Field(default_factory=list)
+    project_key: str = ""
+
+
+class UpdateMeetingRequest(BaseModel):
+    title: str | None = None
+    tags: list[str] | None = None
+    project_key: str | None = None
+    meeting_type: MeetingType | None = None
+
+
+class SpeakerJiraMap(BaseModel):
+    speaker_name: str
+    jira_account_id: str
+    jira_display_name: str = ""
+
+
+class ActionItem(BaseModel):
+    meeting_id: str
+    meeting_title: str
+    meeting_type: MeetingType = "general"
+    project_key: str = ""
+    task_index: int
+    title: str
+    title_en: str = ""
+    assignee: str | None = None
+    deadline: str | None = None
+    priority: Literal["high", "medium", "low"] = "medium"
+    jira_key: str | None = None
+
+
+class SpeakerStat(BaseModel):
+    speaker: str
+    turns: int
+    percent: float
 
 
 class AskRequest(BaseModel):

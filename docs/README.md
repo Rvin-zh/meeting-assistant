@@ -16,6 +16,20 @@
 
 فایل‌های `.html` را در مرورگر باز کنید (RTL، نمودار Mermaid).
 
+## PDF و SVG (خروجی خودکار)
+
+```bash
+chmod +x scripts/export-docs.sh
+./scripts/export-docs.sh
+```
+
+| خروجی | مسیر |
+|--------|------|
+| **PDF** (فارسی RTL، فونت Vazirmatn) | [docs/pdf/](pdf/) |
+| **SVG** (نمودارهای Mermaid) | [docs/diagrams/](diagrams/) |
+
+نیازمندی‌ها: Node.js 20+، اینترنت (اولین بار برای npm و فونت).
+
 ## مخزن کد
 
 https://github.com/Rvin-zh/meeting-assistant

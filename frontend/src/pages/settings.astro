@@ -2,29 +2,114 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="تنظیمات">
-  <h1>تنظیمات</h1>
-  <p class="muted">متغیرهای محیطی از فایل <code dir="ltr">.env</code> در ریشه پروژه خوانده می‌شوند.</p>
+  <section class="hero" style="padding-top:1rem">
+    <h1>تنظیمات</h1>
+    <p>اتصال API، نگاشت گوینده → Jira، راهنمای اجرا</p>
+  </section>
+
   <div id="health" class="card"></div>
-  <div class="card">
-    <h2>راهنمای .env</h2>
-    <pre dir="ltr"><code>GOOGLE_API_KEY=...
-JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
+
+  <section class="card">
+    <h2>نگاشت مسئول Jira</h2>
+    <p class="muted">نام گوینده در transcript (مثلاً «سارا») را به <code dir="ltr">accountId</code> Jira وصل کنید — هنگام create issue اعمال می‌شود.</p>
+    <form id="map-form" class="grid-2" style="margin-top:1rem">
+      <div>
+        <label for="speaker-name">نام گوینده</label>
+        <input id="speaker-name" type="text" placeholder="سارا" required />
+      </div>
+      <div>
+        <label for="jira-account">Jira accountId</label>
+        <input id="jira-account" type="text" dir="ltr" placeholder="712020:..." required />
+      </div>
+      <div style="grid-column:1/-1">
+        <label for="jira-display">نام نمایشی (اختیاری)</label>
+        <input id="jira-display" type="text" dir="ltr" placeholder="Sara M." />
+      </div>
+      <button type="submit" class="btn btn-sm">ذخیره نگاشت</button>
+    </form>
+    <div id="map-list" class="map-table"></div>
+  </section>
+
+  <section class="card">
+    <h2>متغیرهای .env</h2>
+    <pre dir="ltr" style="background:#0f172a;padding:1.25rem;border-radius:10px;overflow:auto;font-size:0.85rem;border:1px solid var(--border)"><code>GOOGLE_API_KEY=...
+GEMINI_MODEL=google:gemini-2.5-flash
+JIRA_SITE_URL=https://your.atlassian.net
 JIRA_PROJECT_KEY=KAN
 JIRA_EMAIL=...
 JIRA_API_TOKEN=...</code></pre>
-  </div>
+  </section>
+
+  <section class="card">
+    <h2>اجرای محلی</h2>
+    <ul class="point-list">
+      <li><code dir="ltr">./scripts/run-backend.sh</code></li>
+      <li><code dir="ltr">./scripts/run-frontend.sh</code></li>
+      <li><code dir="ltr">http://localhost:4321</code></li>
+    </ul>
+  </section>
 </Layout>
 
 <script>
-  import { api } from '../lib/api';
-  const el = document.getElementById('health')!;
+  import { api, escapeHtml } from '../lib/api';
+
+  const healthEl = document.getElementById('health')!;
+  const mapList = document.getElementById('map-list')!;
+
   api.health().then((h) => {
-    el.innerHTML = `
-      <p><strong>وضعیت:</strong> ${h.status}</p>
-      <p><strong>Google API:</strong> ${h.google_api ? '✓' : '✗'}</p>
-      <p><strong>Jira:</strong> ${h.jira_configured ? '✓' : '✗'}</p>
-      <p dir="ltr"><strong>Site:</strong> ${(h as any).jira_site ?? ''}</p>`;
+    healthEl.innerHTML = `
+      <h2>وضعیت سرویس</h2>
+      <div class="status-pills" style="justify-content:flex-start;margin-top:0.75rem">
+        <span class="pill ok">API ${h.status}</span>
+        <span class="pill ${h.google_api ? 'ok' : 'warn'}">Google ${h.google_api ? '✓' : '✗'}</span>
+        <span class="pill ${h.jira_configured ? 'ok' : 'warn'}">Jira ${h.jira_configured ? '✓' : '✗'}</span>
+      </div>
+      <p class="muted" style="margin-top:1rem" dir="ltr">${h.database ?? ''}</p>`;
   }).catch(() => {
-    el.innerHTML = '<p class="alert alert-error">backend در دسترس نیست — uvicorn را اجرا کنید.</p>';
+    healthEl.innerHTML = '<div class="alert alert-error">Backend آفلاین</div>';
   });
+
+  async function loadMap() {
+    try {
+      const rows = await api.listAssigneeMap();
+      if (!rows.length) {
+        mapList.innerHTML = '<p class="muted">هنوز نگاشتی ثبت نشده.</p>';
+        return;
+      }
+      mapList.innerHTML = `
+        <table class="task-table">
+          <thead><tr><th>گوینده</th><th>accountId</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr>
+                <td>${escapeHtml(r.speaker_name)}</td>
+                <td dir="ltr"><code>${escapeHtml(r.jira_account_id)}</code></td>
+                <td><button type="button" class="btn btn-ghost btn-sm map-del" data-name="${escapeHtml(r.speaker_name)}">حذف</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+      mapList.querySelectorAll('.map-del').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const name = (btn as HTMLButtonElement).dataset.name!;
+          await api.deleteAssigneeMap(name);
+          loadMap();
+        });
+      });
+    } catch {
+      mapList.innerHTML = '<p class="muted">خطا در بارگذاری</p>';
+    }
+  }
+
+  document.getElementById('map-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await api.upsertAssigneeMap({
+      speaker_name: (document.getElementById('speaker-name') as HTMLInputElement).value,
+      jira_account_id: (document.getElementById('jira-account') as HTMLInputElement).value,
+      jira_display_name: (document.getElementById('jira-display') as HTMLInputElement).value,
+    });
+    (document.getElementById('map-form') as HTMLFormElement).reset();
+    loadMap();
+  });
+
+  loadMap();
 </script>

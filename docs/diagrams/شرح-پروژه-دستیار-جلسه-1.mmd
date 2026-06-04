@@ -1,0 +1,12 @@
+flowchart TB
+    subgraph agents ["Agents — Sprint 1"]
+        A1["analysis_agent"]
+        A2["rag_agent + Chroma"]
+    end
+    subgraph future ["Agents — Sprint 3+"]
+        A3["jira_agent"]
+        A4["orchestrator"]
+    end
+    A1 --> A2
+    A2 -.-> A3
+    A3 -.-> A4

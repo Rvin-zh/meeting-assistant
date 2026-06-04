@@ -2,65 +2,180 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="خانه — دستیار جلسه">
-  <h1>دستیار جلسه سازمانی</h1>
-  <p class="muted">transcript فارسی را تحلیل کنید — خلاصه، تسک، RAG و Jira</p>
+  <section class="hero">
+    <h1>دستیار جلسه سازمانی</h1>
+    <p>transcript فارسی را به خلاصه، تسک، پرسش هوشمند و issue در Jira تبدیل کنید.</p>
+    <div id="status-pills" class="status-pills"></div>
+  </section>
 
-  <div id="health" class="alert alert-info hidden"></div>
   <div id="error" class="alert alert-error hidden"></div>
 
   <section class="card">
-    <h2>جلسات نمونه (مصنوعی)</h2>
-    <p class="muted">برای دمو سریع، یکی از جلسات آماده را پردازش کنید.</p>
-    <div id="synthetic-list" class="grid grid-2"></div>
+    <div class="card-header">
+      <div>
+        <h2>جلسات اخیر</h2>
+        <p class="muted">جستجو در عنوان و خلاصه</p>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input type="search" id="search-input" placeholder="جستجو…" autocomplete="off" />
+    </div>
+    <div class="filter-row">
+      <select id="filter-type">
+        <option value="">همه انواع</option>
+        <option value="general">عمومی</option>
+        <option value="standup">استنداپ</option>
+        <option value="planning">برنامه‌ریزی</option>
+        <option value="review">مرور</option>
+      </select>
+      <input type="text" id="filter-project" placeholder="پروژه (مثلاً KAN)" dir="ltr" />
+      <input type="text" id="filter-tag" placeholder="برچسب" />
+    </div>
+    <div id="meetings-list" class="meeting-grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>جلسات نمونه</h2>
+    <p class="muted">برای دمو سریع — یک کلیک تا تحلیل کامل</p>
+    <div id="synthetic-list" class="meeting-grid cols-3"></div>
   </section>
 
   <section class="card">
     <h2>transcript جدید</h2>
     <p class="muted">فرمت: <code dir="ltr">[۱۴:۰۲] نام: متن</code></p>
     <form id="upload-form">
-      <label for="title">عنوان (اختیاری)</label>
-      <input id="title" name="title" type="text" placeholder="مثلاً استنداپ دوشنبه" />
-      <label for="transcript" style="margin-top: 0.75rem; display: block;">متن جلسه</label>
-      <textarea id="transcript" name="transcript" placeholder="[۰۹:۰۰] علی: ..."></textarea>
-      <label style="margin-top: 0.75rem; display: block;">
+      <div class="grid-2" style="margin-bottom: 0.75rem;">
+        <div>
+          <label for="title">عنوان (اختیاری)</label>
+          <input id="title" name="title" type="text" placeholder="مثلاً استنداپ دوشنبه" />
+        </div>
+        <div>
+          <label for="meeting-type">نوع جلسه</label>
+          <select id="meeting-type" name="meeting_type">
+            <option value="general">عمومی</option>
+            <option value="standup">استنداپ</option>
+            <option value="planning">برنامه‌ریزی</option>
+            <option value="review">مرور</option>
+          </select>
+        <div>
+          <label for="project-key">پروژه (اختیاری)</label>
+          <input id="project-key" name="project_key" type="text" placeholder="KAN" dir="ltr" />
+        </div>
+      </div>
+      <label for="tags">برچسب‌ها (با کاما)</label>
+      <input id="tags" name="tags" type="text" placeholder="sprint-1, backend" style="margin-bottom:0.75rem" />
+      <label for="transcript">متن جلسه</label>
+      <textarea id="transcript" name="transcript" placeholder="[۰۹:۰۰] علی: صبح بخیر…"></textarea>
+      <label class="file-drop" for="file-input">
         <input type="file" id="file-input" accept=".txt,.vtt,.srt" />
-        آپلود فایل متنی
+        📎 کلیک یا فایل .txt / .vtt / .srt را اینجا بکشید
       </label>
-      <button class="btn" type="submit" style="margin-top: 1rem;">تحلیل جلسه</button>
+      <button class="btn" type="submit" id="submit-btn" style="margin-top: 1rem; width: 100%;">
+        تحلیل جلسه با Gemini
+      </button>
     </form>
-  </section>
-
-  <section class="card">
-    <h2>جلسات اخیر</h2>
-    <div id="meetings-list"></div>
   </section>
 </Layout>
 
+<div id="loading" class="loading-overlay hidden" aria-live="polite">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p>در حال تحلیل جلسه…</p>
+    <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">چند ثانیه تا یک دقیقه</p>
+  </div>
+</div>
+
 <script>
-  import { api } from '../lib/api';
+  import { api, formatDate, MEETING_TYPE_LABELS, escapeHtml } from '../lib/api';
+  import type { MeetingType } from '../lib/api';
 
   const errorEl = document.getElementById('error')!;
-  const healthEl = document.getElementById('health')!;
+  const loadingEl = document.getElementById('loading')!;
   const syntheticList = document.getElementById('synthetic-list')!;
   const meetingsList = document.getElementById('meetings-list')!;
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const filterType = document.getElementById('filter-type') as HTMLSelectElement;
+  const filterProject = document.getElementById('filter-project') as HTMLInputElement;
+  const filterTag = document.getElementById('filter-tag') as HTMLInputElement;
 
   function showError(msg: string) {
     errorEl.textContent = msg;
     errorEl.classList.remove('hidden');
   }
 
+  function setLoading(on: boolean) {
+    loadingEl.classList.toggle('hidden', !on);
+    (document.getElementById('submit-btn') as HTMLButtonElement).disabled = on;
+  }
+
   async function loadHealth() {
+    const pills = document.getElementById('status-pills')!;
     try {
       const h = await api.health();
-      healthEl.textContent = h.google_api
-        ? '✓ Google API متصل است' + (h.jira_configured ? ' · ✓ Jira پیکربندی شده' : ' · ⚠ Jira ناقص')
-        : '⚠ GOOGLE_API_KEY در .env تنظیم نشده';
-      healthEl.classList.remove('hidden');
+      pills.innerHTML = `
+        <span class="pill ${h.google_api ? 'ok' : 'warn'}">${h.google_api ? '✓ Gemini' : '⚠ Gemini'}</span>
+        <span class="pill ${h.jira_configured ? 'ok' : 'warn'}">${h.jira_configured ? '✓ Jira' : '⚠ Jira'}</span>
+        <span class="pill ok">✓ SQLite</span>`;
     } catch {
-      healthEl.textContent = '⚠ backend در http://127.0.0.1:8000 در دسترس نیست';
-      healthEl.classList.remove('hidden');
+      pills.innerHTML = '<span class="pill err">⚠ Backend آفلاین</span>';
     }
   }
+
+  function renderMeetings(meetings: Awaited<ReturnType<typeof api.listMeetings>>) {
+    if (!meetings.length) {
+      meetingsList.innerHTML = '<p class="muted" style="grid-column:1/-1">جلسه‌ای یافت نشد.</p>';
+      return;
+    }
+    meetingsList.innerHTML = meetings
+      .map((m) => {
+        const type = (m.meeting_type ?? 'general') as MeetingType;
+        const typeLabel = MEETING_TYPE_LABELS[type] ?? type;
+        const tasks = m.analysis?.tasks?.length ?? 0;
+        const snippet = (m.analysis?.summary ?? '').slice(0, 120);
+        const tags = (m.tags ?? []).map((t) => `<span class="badge badge-type">${escapeHtml(t)}</span>`).join(' ');
+        return `
+        <a href="/meeting/${m.id}" class="meeting-card">
+          <h3>${escapeHtml(m.title)}</h3>
+          <p class="snippet">${escapeHtml(snippet)}${snippet.length >= 120 ? '…' : ''}</p>
+          <div class="meta-row">
+            <span class="badge badge-type">${typeLabel}</span>
+            ${m.project_key ? `<span dir="ltr">${escapeHtml(m.project_key)}</span>` : ''}
+            ${tags}
+            <span>${tasks} تسک</span>
+            <span>${formatDate(m.created_at)}</span>
+          </div>
+        </a>`;
+      })
+      .join('');
+  }
+
+  function getFilters() {
+    return {
+      q: searchInput.value,
+      type: (filterType.value || undefined) as MeetingType | undefined,
+      project: filterProject.value || undefined,
+      tag: filterTag.value || undefined,
+    };
+  }
+
+  let searchTimer: ReturnType<typeof setTimeout>;
+  async function loadMeetings() {
+    try {
+      const meetings = await api.listMeetings(getFilters());
+      renderMeetings(meetings);
+    } catch (e) {
+      showError(String(e));
+    }
+  }
+
+  [searchInput, filterType, filterProject, filterTag].forEach((el) => {
+    el.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadMeetings, 300);
+    });
+    el.addEventListener('change', loadMeetings);
+  });
 
   async function loadSynthetic() {
     try {
@@ -68,10 +183,10 @@ import Layout from '../layouts/Layout.astro';
       syntheticList.innerHTML = items
         .map(
           (item) => `
-        <div class="card" style="margin:0">
-          <strong>${item.title}</strong>
-          <p class="muted">${item.filename}</p>
-          <button class="btn btn-process" data-id="${item.id}">پردازش</button>
+        <div class="synthetic-card card" style="margin:0">
+          <strong>${escapeHtml(item.title.replace(/-/g, ' '))}</strong>
+          <p class="muted" style="font-size:0.82rem;margin:0.5rem 0">${item.filename}</p>
+          <button class="btn btn-sm btn-process" data-id="${item.id}">پردازش نمونه</button>
         </div>`
         )
         .join('');
@@ -79,33 +194,17 @@ import Layout from '../layouts/Layout.astro';
         btn.addEventListener('click', async () => {
           const id = (btn as HTMLButtonElement).dataset.id!;
           btn.setAttribute('disabled', 'true');
+          setLoading(true);
           try {
             const meeting = await api.createFromSynthetic(id);
             window.location.href = `/meeting/${meeting.id}`;
           } catch (e) {
             showError(String(e));
             btn.removeAttribute('disabled');
+            setLoading(false);
           }
         });
       });
-    } catch (e) {
-      showError(String(e));
-    }
-  }
-
-  async function loadMeetings() {
-    try {
-      const meetings = await api.listMeetings();
-      if (!meetings.length) {
-        meetingsList.innerHTML = '<p class="muted">هنوز جلسه‌ای ثبت نشده.</p>';
-        return;
-      }
-      meetingsList.innerHTML = `<ul>${meetings
-        .map(
-          (m) =>
-            `<li><a href="/meeting/${m.id}">${m.title}</a> <span class="muted">${new Date(m.created_at).toLocaleString('fa-IR')}</span></li>`
-        )
-        .join('')}</ul>`;
     } catch (e) {
       showError(String(e));
     }
@@ -122,11 +221,27 @@ import Layout from '../layouts/Layout.astro';
     e.preventDefault();
     const transcript = (document.getElementById('transcript') as HTMLTextAreaElement).value;
     const title = (document.getElementById('title') as HTMLInputElement).value;
+    const meetingType = (document.getElementById('meeting-type') as HTMLSelectElement).value as MeetingType;
+    const projectKey = (document.getElementById('project-key') as HTMLInputElement).value;
+    const tagsRaw = (document.getElementById('tags') as HTMLInputElement).value;
+    const tags = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean);
+    if (!transcript.trim()) {
+      showError('لطفاً متن جلسه را وارد کنید.');
+      return;
+    }
+    setLoading(true);
+    errorEl.classList.add('hidden');
     try {
-      const meeting = await api.createMeeting(transcript, title || undefined);
+      const meeting = await api.createMeeting(transcript, {
+        title: title || undefined,
+        meetingType,
+        projectKey,
+        tags,
+      });
       window.location.href = `/meeting/${meeting.id}`;
     } catch (err) {
       showError(String(err));
+      setLoading(false);
     }
   });
 

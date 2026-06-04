@@ -4,6 +4,9 @@
 
 | تاریخ | تغییر |
 |--------|--------|
+| ۱۴۰۵/۰۳/۰۶ | **PDF/SVG:** `scripts/export-docs.sh` — HTML→PDF (Playwright RTL) + Mermaid→SVG |
+| ۱۴۰۵/۰۳/۰۶ | **Sprint 2/3 lite:** برچسب/پروژه، فیلتر، داشبورد تسک‌ها، قالب تحلیل، نگاشت Jira |
+| ۱۴۰۵/۰۳/۰۶ | **Sprint 3 lite:** نگاشت گوینده→Jira assignee، ذخیره jira_key، آمار مشارکت، حذف جلسه |
 | ۱۴۰۵/۰۳/۰۶ | **نقشه اسپرینت:** `docs/نقشه-اسپرینت‌ها.html` + `future-sprints-roadmap.md` (بدون STT) |
 | ۱۴۰۵/۰۳/۰۶ | **تست‌ها:** `test_database`, `test_api_sqlite`, `test_live_api` (HTTP + Gemini/Jira)؛ `run-all-tests.sh` |
 | ۱۴۰۵/۰۳/۰۶ | **SQLite:** جلسات و خلاصه‌ها در `data/meetings.db` (مهاجرت خودکار از `data/meetings/*.json`) |
