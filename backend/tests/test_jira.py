@@ -27,7 +27,9 @@ class TestBuildIssuePayload:
         issue = build_issue_payload(task, "استنداپ", "Sprint standup")
         assert issue.summary == "Fix refresh token bug"
         assert "*Meeting:* Sprint standup" in issue.description
-        assert "*Context:* Fix refresh token bug before smoke tests" in issue.description
+        assert (
+            "*Context:* Fix refresh token bug before smoke tests" in issue.description
+        )
         assert "*Suggested assignee:* Sara" in issue.description
         assert "*Deadline:* tomorrow" in issue.description
         assert issue.priority == "High"
@@ -110,7 +112,7 @@ class TestCreateIssues:
         ):
             created = await create_issues([issue])
 
-        assert created == [{"key": "KAN-99", "summary": "Task"}]
+        assert created == [{"key": "KAN-99", "summary": "Task", "task_index": 0}]
         mock_client.post.assert_called_once()
 
     @pytest.mark.asyncio

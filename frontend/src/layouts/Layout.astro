@@ -9,6 +9,7 @@ const { title = 'دستیار جلسه' } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="دستیار هوشمند جلسات — خلاصه، تسک، RAG و Jira" />
     <title>{title}</title>
     <link
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
@@ -18,14 +19,21 @@ const { title = 'دستیار جلسه' } = Astro.props;
   </head>
   <body>
     <header class="site-header">
-      <a href="/" class="brand">دستیار جلسه</a>
+      <a href="/" class="brand">
+        <span class="brand-icon" aria-hidden="true">◇</span>
+        دستیار جلسه
+      </a>
       <nav>
         <a href="/">خانه</a>
+        <a href="/tasks">تسک‌ها</a>
         <a href="/settings">تنظیمات</a>
       </nav>
     </header>
     <main class="container">
       <slot />
     </main>
+    <footer class="site-footer">
+      دستیار جلسه سازمانی · MVP · transcript → خلاصه · RAG · Jira
+    </footer>
   </body>
 </html>

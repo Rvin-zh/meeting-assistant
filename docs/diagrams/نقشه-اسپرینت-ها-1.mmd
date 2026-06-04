@@ -1,0 +1,10 @@
+flowchart LR
+    subgraph agents ["Agents پیشنهادی"]
+        A1["analysis_agent"]
+        A2["rag_agent"]
+        A3["jira_agent"]
+        A4["review_agent<br/>کیفیت خلاصه"]
+        A5["risk_agent<br/>تعارض/ریسک"]
+        O["orchestrator"]
+    end
+    O --> A1 & A2 & A3 & A4 & A5

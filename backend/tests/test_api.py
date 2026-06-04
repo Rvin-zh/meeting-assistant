@@ -15,6 +15,78 @@ def client(meeting_store, vector_store, monkeypatch: pytest.MonkeyPatch):
     return TestClient(app)
 
 
+class TestSearchAndExport:
+    def test_list_with_search_query(self, client: TestClient, sample_record):
+        response = client.get("/api/meetings", params={"q": "استنداپ"})
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
+
+    def test_export_markdown(self, client: TestClient, sample_record):
+        response = client.get(f"/api/meetings/{sample_record.id}/export")
+        assert response.status_code == 200
+        assert "markdown" in response.headers.get("content-type", "")
+        assert "## خلاصه" in response.text
+
+
+class TestFutureFeaturesApi:
+    def test_list_tasks_endpoint(self, client: TestClient, sample_record):
+        r = client.get("/api/tasks")
+        assert r.status_code == 200
+        assert len(r.json()) >= 1
+
+    def test_speakers_endpoint(self, client: TestClient, sample_record):
+        r = client.get(f"/api/meetings/{sample_record.id}/speakers")
+        assert r.status_code == 200
+        assert isinstance(r.json(), list)
+
+    def test_patch_meeting(self, client: TestClient, sample_record):
+        r = client.patch(
+            f"/api/meetings/{sample_record.id}",
+            json={"tags": ["x"], "project_key": "P1"},
+        )
+        assert r.status_code == 200
+        assert r.json()["tags"] == ["x"]
+
+    def test_delete_meeting(
+        self, meeting_store, vector_store, monkeypatch: pytest.MonkeyPatch
+    ):
+        from backend.models.schemas import MeetingRecord
+        from backend.tests.conftest import SAMPLE_ANALYSIS, SAMPLE_TRANSCRIPT
+
+        record = MeetingRecord(
+            id="del-me",
+            title="del",
+            transcript=SAMPLE_TRANSCRIPT,
+            analysis=SAMPLE_ANALYSIS,
+            created_at="2026-05-26T00:00:00+00:00",
+        )
+        meeting_store.save(record)
+        monkeypatch.setattr("backend.main.meeting_store", meeting_store)
+        monkeypatch.setattr("backend.main.vector_store", vector_store)
+        c = TestClient(app)
+        assert c.delete("/api/meetings/del-me").status_code == 200
+        assert meeting_store.get("del-me") is None
+
+    def test_assignee_map_crud(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_data_dirs: dict
+    ):
+        from backend.services.assignee_map import AssigneeMapStore
+
+        store = AssigneeMapStore(tmp_data_dirs["db"])
+        monkeypatch.setattr("backend.main.assignee_map", store)
+        c = TestClient(app)
+        put = c.put(
+            "/api/settings/assignee-map",
+            json={
+                "speaker_name": "علی",
+                "jira_account_id": "a1",
+                "jira_display_name": "",
+            },
+        )
+        assert put.status_code == 200
+        assert len(c.get("/api/settings/assignee-map").json()) == 1
+
+
 class TestHealthEndpoint:
     def test_health_ok(self, client: TestClient):
         response = client.get("/api/health")

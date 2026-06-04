@@ -60,33 +60,37 @@ def preview_issues(
     return issues
 
 
-async def create_issues(issues: list[JiraPreviewIssue]) -> list[dict[str, Any]]:
+async def create_issues(
+    issues: list[JiraPreviewIssue],
+    assignee_account_ids: list[str | None] | None = None,
+) -> list[dict[str, Any]]:
     if not JIRA_EMAIL or not JIRA_API_TOKEN:
         raise ValueError("Jira credentials are not configured")
 
     created: list[dict[str, Any]] = []
     async with httpx.AsyncClient(timeout=30.0) as client:
-        for issue in issues:
-            payload = {
-                "fields": {
-                    "project": {"key": JIRA_PROJECT_KEY},
-                    "summary": issue.summary,
-                    "description": {
-                        "type": "doc",
-                        "version": 1,
-                        "content": [
-                            {
-                                "type": "paragraph",
-                                "content": [
-                                    {"type": "text", "text": issue.description}
-                                ],
-                            }
-                        ],
-                    },
-                    "issuetype": {"name": "Task"},
-                    "priority": {"name": issue.priority},
-                }
+        for i, issue in enumerate(issues):
+            fields: dict[str, Any] = {
+                "project": {"key": JIRA_PROJECT_KEY},
+                "summary": issue.summary,
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "text", "text": issue.description}],
+                        }
+                    ],
+                },
+                "issuetype": {"name": "Task"},
+                "priority": {"name": issue.priority},
             }
+            if assignee_account_ids and i < len(assignee_account_ids):
+                account_id = assignee_account_ids[i]
+                if account_id:
+                    fields["assignee"] = {"accountId": account_id}
+            payload = {"fields": fields}
             response = await client.post(
                 f"{JIRA_SITE_URL.rstrip('/')}/rest/api/3/issue",
                 headers=_auth_header(),
@@ -96,5 +100,11 @@ async def create_issues(issues: list[JiraPreviewIssue]) -> list[dict[str, Any]]:
                 detail = response.text
                 raise ValueError(f"Jira error ({response.status_code}): {detail}")
             data = response.json()
-            created.append({"key": data.get("key"), "summary": issue.summary})
+            created.append(
+                {
+                    "key": data.get("key"),
+                    "summary": issue.summary,
+                    "task_index": issue.task_index,
+                }
+            )
     return created

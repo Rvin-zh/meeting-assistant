@@ -1,0 +1,13 @@
+flowchart TB
+    subgraph pages ["صفحات — RTL"]
+        home["/ خانه"]
+        meeting["/meeting/id"]
+        settings["/settings"]
+    end
+    subgraph tabs ["تب‌های جلسه"]
+        tab1["خلاصه و تصمیمات"]
+        tab2["تسک‌ها + Jira"]
+        tab3["پرسش از جلسه"]
+    end
+    home --> meeting
+    meeting --> tabs

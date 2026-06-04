@@ -18,3 +18,5 @@ data/chroma/
 data/vectors/
 .~lock.*
 *.docx
+docs/node_modules/
+docs/.playwright/

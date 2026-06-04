@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 from backend.agents.rag import ask_meeting
 from backend.config import (
@@ -11,17 +12,25 @@ from backend.config import (
     SQLITE_PATH,
 )
 from backend.models.schemas import (
+    ActionItem,
     AskRequest,
     CreateMeetingRequest,
     JiraCreateRequest,
     MeetingRecord,
+    MeetingType,
+    SpeakerJiraMap,
+    SpeakerStat,
+    UpdateMeetingRequest,
 )
+from backend.services.assignee_map import AssigneeMapStore
+from backend.services.export import meeting_to_markdown
 from backend.services.ingest import ingest_meeting
 from backend.services.jira import create_issues, preview_issues
 from backend.services.meeting_store import MeetingStore
+from backend.services.stats import speaker_participation
 from backend.services.vector_store import VectorStore
 
-app = FastAPI(title="دستیار جلسه", version="0.1.0")
+app = FastAPI(title="دستیار جلسه", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +42,7 @@ app.add_middleware(
 
 meeting_store = MeetingStore(SQLITE_PATH)
 vector_store = VectorStore(CHROMA_DIR)
+assignee_map = AssigneeMapStore(SQLITE_PATH)
 
 
 @app.get("/api/health")
@@ -47,8 +57,24 @@ async def health() -> dict:
 
 
 @app.get("/api/meetings")
-async def list_meetings() -> list[MeetingRecord]:
-    return meeting_store.list_all()
+async def list_meetings(
+    q: str | None = Query(None, description="جستجو در عنوان و خلاصه"),
+    type: MeetingType | None = Query(None, alias="type"),
+    project: str | None = Query(None),
+    tag: str | None = Query(None),
+) -> list[MeetingRecord]:
+    if q and q.strip():
+        return meeting_store.search(
+            q.strip(), meeting_type=type, project_key=project, tag=tag
+        )
+    return meeting_store.list_all(meeting_type=type, project_key=project, tag=tag)
+
+
+@app.get("/api/tasks", response_model=list[ActionItem])
+async def list_tasks(
+    open_only: bool = Query(False, description="فقط تسک‌های بدون Jira key"),
+) -> list[ActionItem]:
+    return meeting_store.list_action_items(open_only=open_only)
 
 
 @app.get("/api/meetings/synthetic")
@@ -84,6 +110,9 @@ async def create_meeting(body: CreateMeetingRequest) -> MeetingRecord:
         return await ingest_meeting(
             body.transcript,
             title=body.title,
+            meeting_type=body.meeting_type,
+            tags=body.tags,
+            project_key=body.project_key,
             store=meeting_store,
             vector_store=vector_store,
         )
@@ -93,12 +122,52 @@ async def create_meeting(body: CreateMeetingRequest) -> MeetingRecord:
         raise HTTPException(status_code=502, detail=f"خطا در پردازش: {exc}") from exc
 
 
+@app.get("/api/meetings/{meeting_id}/export")
+async def export_meeting(meeting_id: str) -> PlainTextResponse:
+    record = meeting_store.get(meeting_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="جلسه یافت نشد")
+    md = meeting_to_markdown(record)
+    filename = f"meeting-{meeting_id}.md"
+    return PlainTextResponse(
+        content=md,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/meetings/{meeting_id}/speakers", response_model=list[SpeakerStat])
+async def meeting_speakers(meeting_id: str) -> list[SpeakerStat]:
+    record = meeting_store.get(meeting_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="جلسه یافت نشد")
+    stats = speaker_participation(record.transcript)
+    return [SpeakerStat(**s) for s in stats]
+
+
 @app.get("/api/meetings/{meeting_id}", response_model=MeetingRecord)
 async def get_meeting(meeting_id: str) -> MeetingRecord:
     record = meeting_store.get(meeting_id)
     if not record:
         raise HTTPException(status_code=404, detail="جلسه یافت نشد")
     return record
+
+
+@app.patch("/api/meetings/{meeting_id}", response_model=MeetingRecord)
+async def update_meeting(meeting_id: str, body: UpdateMeetingRequest) -> MeetingRecord:
+    record = meeting_store.update(meeting_id, body)
+    if not record:
+        raise HTTPException(status_code=404, detail="جلسه یافت نشد")
+    return record
+
+
+@app.delete("/api/meetings/{meeting_id}")
+async def delete_meeting(meeting_id: str) -> dict:
+    if not meeting_store.get(meeting_id):
+        raise HTTPException(status_code=404, detail="جلسه یافت نشد")
+    meeting_store.delete(meeting_id)
+    vector_store.delete_meeting(meeting_id)
+    return {"deleted": meeting_id}
 
 
 @app.post("/api/meetings/{meeting_id}/ask")
@@ -147,10 +216,44 @@ async def jira_create(meeting_id: str, body: JiraCreateRequest | None = None):
     if not selected:
         raise HTTPException(status_code=400, detail="تسکی برای ارسال نیست")
 
+    assignee_ids = [
+        assignee_map.resolve_account_id(
+            record.analysis.tasks[issue.task_index].assignee
+        )
+        for issue in selected
+    ]
+
     try:
-        created = await create_issues(selected)
+        created = await create_issues(selected, assignee_account_ids=assignee_ids)
+        for item in created:
+            idx = item.get("task_index")
+            key = item.get("key")
+            if idx is not None and key:
+                meeting_store.update_task_jira_keys(meeting_id, idx, key)
         return {"created": created}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"خطا در Jira: {exc}") from exc
+
+
+# --- Assignee mapping (Sprint 3 lite) ---
+
+
+@app.get("/api/settings/assignee-map", response_model=list[SpeakerJiraMap])
+async def list_assignee_map() -> list[SpeakerJiraMap]:
+    return assignee_map.list_all()
+
+
+@app.put("/api/settings/assignee-map", response_model=SpeakerJiraMap)
+async def upsert_assignee_map(entry: SpeakerJiraMap) -> SpeakerJiraMap:
+    if not entry.speaker_name.strip() or not entry.jira_account_id.strip():
+        raise HTTPException(status_code=400, detail="نام گوینده و accountId الزامی است")
+    return assignee_map.upsert(entry)
+
+
+@app.delete("/api/settings/assignee-map/{speaker_name}")
+async def delete_assignee_map(speaker_name: str) -> dict:
+    if not assignee_map.delete(speaker_name):
+        raise HTTPException(status_code=404, detail="نگاشت یافت نشد")
+    return {"deleted": speaker_name}

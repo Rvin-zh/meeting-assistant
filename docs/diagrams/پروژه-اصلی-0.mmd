@@ -1,0 +1,20 @@
+flowchart TB
+    subgraph client ["کلاینت — RTL فارسی"]
+        Astro["Astro UI"]
+    end
+    subgraph server ["سرور"]
+        FastAPI["FastAPI"]
+        PAI["Pydantic AI Agents"]
+        Gemini["Gemini Flash"]
+        Embed["Google Embeddings"]
+        SQLite["SQLite<br/>meetings.db"]
+        Chroma["ChromaDB<br/>data/chroma/"]
+        Jira["Jira Cloud"]
+    end
+    Astro --> FastAPI
+    FastAPI --> PAI
+    PAI --> Gemini
+    FastAPI --> SQLite
+    FastAPI --> Embed --> Chroma
+    PAI --> Chroma
+    FastAPI --> Jira
