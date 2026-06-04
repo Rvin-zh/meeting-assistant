@@ -42,7 +42,7 @@
   <li>تسک‌های دستی و پراکنده → گم شدن مسئولیت‌ها</li>
   <li>عدم جستجو در محتوای جلسات → از دست رفتن context</li>
 </ul>
-<p><strong>ارزش MVP:</strong> یک جریان end-to-end از transcript تا Jira + RAG، قابل دمو در چند دقیقه.</p>
+<p><strong>ارزش MVP:</strong> یک جریان end-to-end از transcript (یا <strong>فایل/ضبط صوتی</strong>) تا Jira + RAG، قابل دمو در چند دقیقه.</p>
 
 <h2>۳. RAG در این پروژه</h2>
 <div class="mermaid-wrap">
@@ -75,7 +75,8 @@ flowchart LR
   <li><strong>Typed output:</strong> مدل‌های Pydantic برای خلاصه و تسک — validation خودکار</li>
   <li><strong>RAG:</strong> Chroma retrieval + <code>rag_agent</code> — بدون نمایش خام <code>[c0] speaker: …</code> در UI</li>
   <li><strong>Jira:</strong> فیلدهای انگلیسی (<code>title_en</code>) برای issue؛ UI فارسی</li>
-  <li><strong>Gemini native:</strong> <span dir="ltr">Agent('google:gemini-2.5-flash')</span></li>
+  <li><strong>Voice:</strong> <span dir="ltr">POST /api/transcribe</span> — Gemini رونویسی صوت → همان pipeline تحلیل</li>
+  <li><strong>Gemini native:</strong> <span dir="ltr">Agent('google:gemini-3.5-flash')</span> + رونویسی multimodal audio</li>
   <li><strong>قابل گسترش:</strong> agent Jira، multi-agent debate در sprint بعد</li>
 </ul>
 
@@ -140,7 +141,7 @@ flowchart LR
 </div>
 <div class="future">
   <strong>MLOps / کیفیت (Sprint 5+):</strong> مجموعه golden transcript · eval خودکار خلاصه · نسخه‌گذاری prompt · پایش drift — نه بازآموزی مدل در MVP.<br>
-  <strong>نقشه محصول:</strong> <a href="نقشه-اسپرینت‌ها.html">نقشه-اسپرینت‌ها.html</a> (بدون voice-to-text).
+  <strong>نقشه محصول:</strong> <a href="نقشه-اسپرینت‌ها.html">نقشه-اسپرینت‌ها.html</a> — شامل voice Gemini؛ STT زنده در sprint بعدی نیست.
 </div>
 
 <h2>۹. منابع</h2>
@@ -166,7 +167,7 @@ flowchart LR
 <h2>۱۱. مدل‌های AI</h2>
 <table>
   <tr><th>کاربرد</th><th>مدل</th></tr>
-  <tr><td>تحلیل + RAG generation</td><td dir="ltr">google:gemini-2.5-flash</td></tr>
+  <tr><td>تحلیل + RAG generation</td><td dir="ltr">google:gemini-3.5-flash</td></tr>
   <tr><td>Embedding</td><td dir="ltr">gemini-embedding-001</td></tr>
   <tr><td>Vector DB</td><td dir="ltr">ChromaDB</td></tr>
   <tr><td>UI</td><td>Astro SSR — صفحه جلسه</td></tr>

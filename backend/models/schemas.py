@@ -111,6 +111,10 @@ class AskRequest(BaseModel):
     question: str
 
 
+class TranscribeResponse(BaseModel):
+    transcript: str
+
+
 class JiraPreviewIssue(BaseModel):
     summary: str
     description: str

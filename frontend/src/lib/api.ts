@@ -80,6 +80,10 @@ export interface JiraPreviewIssue {
   task_index: number;
 }
 
+export interface TranscribeResponse {
+  transcript: string;
+}
+
 export interface HealthResponse {
   status: string;
   google_api: boolean;
@@ -147,6 +151,16 @@ export const api = {
         project_key: opts?.projectKey ?? '',
       }),
     }),
+  transcribeAudio: async (file: Blob, filename = 'recording.webm') => {
+    const form = new FormData();
+    form.append('file', file, filename);
+    const res = await fetch(`${API_BASE}/api/transcribe`, { method: 'POST', body: form });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail ?? 'خطای رونویسی');
+    }
+    return res.json() as Promise<TranscribeResponse>;
+  },
   getMeeting: (id: string) => request<MeetingRecord>(`/api/meetings/${id}`),
   updateMeeting: (id: string, body: Partial<{ title: string; tags: string[]; project_key: string; meeting_type: MeetingType }>) =>
     request<MeetingRecord>(`/api/meetings/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),

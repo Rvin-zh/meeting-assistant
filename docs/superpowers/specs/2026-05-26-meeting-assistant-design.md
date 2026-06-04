@@ -1,16 +1,16 @@
 # دستیار جلسه سازمانی — Design Spec
 
 **تاریخ:** 2026-05-26  
-**آخرین به‌روزرسانی:** 2026-05-26 (ChromaDB, RAG هوشمند, Jira EN, SSR)  
+**آخرین به‌روزرسانی:** 2026-06-04 (Voice/Gemini transcribe, ChromaDB, RAG هوشمند, Jira EN, SSR)  
 **وضعیت:** MVP پیاده‌شده  
-**هدف:** MVP دمو با UI فارسی، RAG تک‌جلسه، استخراج تسک، Jira واقعی  
+**هدف:** MVP دمو با UI فارسی، ورود متن/صوت، RAG تک‌جلسه، استخراج تسک، Jira واقعی  
 **مخزن:** https://github.com/Rvin-zh/meeting-assistant
 
 ---
 
 ## ۱. خلاصه
 
-اپ **دستیار جلسه** transcript فارسی (با نام گوینده) می‌گیرد، با **Gemini** خلاصه و تسک استخراج می‌کند، **RAG** برای پرسش از همان جلسه دارد، و تسک‌ها را با preview به **Jira (KAN)** می‌فرستد. Issueهای Jira به **انگلیسی** ثبت می‌شوند؛ UI فارسی RTL است.
+اپ **دستیار جلسه** transcript فارسی (paste، فایل متنی، یا **رونویسی صوت با Gemini**) می‌گیرد، با **Gemini** خلاصه و تسک استخراج می‌کند، **RAG** برای پرسش از همان جلسه دارد، و تسک‌ها را با preview به **Jira (KAN)** می‌فرستد. Issueهای Jira به **انگلیسی** ثبت می‌شوند؛ UI فارسی RTL است.
 
 **Stack:**
 
@@ -19,7 +19,7 @@
 | UI | Astro SSR (سبک، RTL فارسی) |
 | API | FastAPI |
 | Agentic | **Pydantic AI** (typed output) |
-| LLM | `google:gemini-2.5-flash` |
+| LLM | `google:gemini-3.5-flash` |
 | Embedding | `gemini-embedding-001` |
 | Meetings DB | **SQLite** (`data/meetings.db`) — transcript, summary, tasks |
 | Vector store | **ChromaDB** embedded (`data/chroma/`) |
@@ -103,6 +103,7 @@ class ChunkCitation(BaseModel):
 | Method | مسیر | Logic |
 |--------|------|-------|
 | GET | `/api/meetings` | لیست جلسات |
+| POST | `/api/transcribe` | multipart audio → Gemini → transcript فارسی |
 | POST | `/api/meetings` | parse → Chroma index → `analysis_agent` |
 | GET | `/api/meetings/{id}` | جزئیات |
 | POST | `/api/meetings/{id}/ask` | small-talk یا Chroma + `rag_agent` |
@@ -115,6 +116,12 @@ Frontend: `PUBLIC_BACKEND_URL` (پیش‌فرض `http://127.0.0.1:8000`).
 ---
 
 ## ۵. Pipeline
+
+### Voice (optional pre-step)
+
+1. User uploads audio (`mp3`, `wav`, `webm`, …) or records in browser
+2. `POST /api/transcribe` → Gemini `generateContent` with inline audio (same `GOOGLE_API_KEY`)
+3. Returns Persian transcript `[MM:SS] speaker: text` — user edits, then normal ingest
 
 ### Ingest
 
@@ -164,7 +171,7 @@ Frontend: `PUBLIC_BACKEND_URL` (پیش‌فرض `http://127.0.0.1:8000`).
 
 ```
 GOOGLE_API_KEY=
-GEMINI_MODEL=google:gemini-2.5-flash
+GEMINI_MODEL=google:gemini-3.5-flash
 EMBEDDING_MODEL=gemini-embedding-001
 JIRA_SITE_URL=https://arvinzaheri17.atlassian.net
 JIRA_PROJECT_KEY=KAN
@@ -211,7 +218,7 @@ project/
 
 | نوع | دستور | تعداد |
 |-----|--------|-------|
-| Unit (mock) | `./scripts/run-tests.sh` | 97 |
+| Unit (mock) | `./scripts/run-tests.sh` | 137 |
 | Live API | `./scripts/run-live-tests.sh` | 12 |
 
 پوشش: parser، Chroma vector_store، RAG small-talk، agents (mock).
@@ -221,7 +228,8 @@ project/
 ## ۱۲. Sprintهای آینده
 
 **جزئیات کامل:** [future-sprints-roadmap.md](future-sprints-roadmap.md) · [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html)  
-**خارج از scope:** STT / ضبط صوت / voice-to-text
+**خارج از scope (فعلاً):** STT زنده/streaming، diarization حرفه‌ای، Cloud Speech-to-Text جدا  
+**در MVP:** رونویسی فایل/ضبط با Gemini (`/api/transcribe`)
 
 | Sprint | قابلیت |
 |--------|--------|

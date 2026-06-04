@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
@@ -20,14 +20,17 @@ from backend.models.schemas import (
     MeetingType,
     SpeakerJiraMap,
     SpeakerStat,
+    TranscribeResponse,
     UpdateMeetingRequest,
 )
 from backend.services.assignee_map import AssigneeMapStore
+from backend.services.audio_transcribe import transcribe_audio
 from backend.services.export import meeting_to_markdown
 from backend.services.ingest import ingest_meeting
 from backend.services.jira import create_issues, preview_issues
 from backend.services.meeting_store import MeetingStore
 from backend.services.stats import speaker_participation
+from backend.services.gemini_errors import http_exception_from_gemini_error
 from backend.services.vector_store import VectorStore
 
 app = FastAPI(title="دستیار جلسه", version="0.2.0")
@@ -82,6 +85,26 @@ async def list_synthetic() -> list[dict[str, str]]:
     return meeting_store.list_synthetic()
 
 
+@app.post("/api/transcribe", response_model=TranscribeResponse)
+async def transcribe_meeting_audio(
+    file: UploadFile = File(..., description="فایل صوتی جلسه"),
+) -> TranscribeResponse:
+    if not GOOGLE_API_KEY:
+        raise HTTPException(status_code=400, detail="GOOGLE_API_KEY تنظیم نشده است")
+    try:
+        data = await file.read()
+        transcript = await transcribe_audio(
+            data,
+            filename=file.filename,
+            content_type=file.content_type,
+        )
+        return TranscribeResponse(transcript=transcript)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise http_exception_from_gemini_error(exc, context="رونویسی صوت") from exc
+
+
 @app.post("/api/meetings/synthetic/{file_id}", response_model=MeetingRecord)
 async def create_from_synthetic(file_id: str) -> MeetingRecord:
     try:
@@ -99,7 +122,7 @@ async def create_from_synthetic(file_id: str) -> MeetingRecord:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"خطا در پردازش: {exc}") from exc
+        raise http_exception_from_gemini_error(exc, context="پردازش") from exc
 
 
 @app.post("/api/meetings", response_model=MeetingRecord)
@@ -119,7 +142,7 @@ async def create_meeting(body: CreateMeetingRequest) -> MeetingRecord:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"خطا در پردازش: {exc}") from exc
+        raise http_exception_from_gemini_error(exc, context="پردازش") from exc
 
 
 @app.get("/api/meetings/{meeting_id}/export")
@@ -181,7 +204,7 @@ async def ask_question(meeting_id: str, body: AskRequest):
         answer = await ask_meeting(meeting_id, body.question, vector_store)
         return answer
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"خطا در RAG: {exc}") from exc
+        raise http_exception_from_gemini_error(exc, context="RAG") from exc
 
 
 @app.post("/api/meetings/{meeting_id}/jira/preview")
