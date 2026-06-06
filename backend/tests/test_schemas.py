@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from backend.models.schemas import (
     AskRequest,
     CreateMeetingRequest,
+    FacilitationReport,
     JiraCreateRequest,
     MeetingAnalysis,
     MeetingRecord,
@@ -66,3 +67,27 @@ class TestRequestModels:
     def test_jira_create_with_indices(self):
         req = JiraCreateRequest(task_indices=[0, 2])
         assert req.task_indices == [0, 2]
+
+
+class TestFacilitationReport:
+    def test_valid_report(self):
+        report = FacilitationReport(
+            what_went_well=["خوب"],
+            improvements=["بهتر"],
+            next_meeting_agenda=["بند ۱"],
+            timebox_suggestion="۴۵ دقیقه",
+            coaching_summary="خلاصه",
+            facilitator_score=5,
+        )
+        assert report.facilitator_score == 5
+
+    def test_facilitator_score_bounds(self):
+        with pytest.raises(ValidationError):
+            FacilitationReport(facilitator_score=0)
+        with pytest.raises(ValidationError):
+            FacilitationReport(facilitator_score=6)
+
+    def test_optional_score_defaults_none(self):
+        report = FacilitationReport()
+        assert report.facilitator_score is None
+        assert report.what_went_well == []

@@ -19,7 +19,7 @@ chmod +x scripts/run-tests.sh
 ./scripts/run-tests.sh
 ```
 
-**137 unit tests** (+ **12 live tests** with real APIs) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh` · both: `./scripts/run-all-tests.sh`
+**141 unit tests** (+ **12 live tests** with real APIs) — unit: `./scripts/run-tests.sh` · live: `./scripts/run-live-tests.sh` · both: `./scripts/run-all-tests.sh`
 
 ## اجرا
 
@@ -44,6 +44,7 @@ chmod +x scripts/run-frontend.sh
 - `docs/README.md` — فهرست مستندات
 - `docs/CHANGELOG.md` — **تاریخچه تغییرات** (با هر feature به‌روز شود)
 - `docs/پروژه-اصلی.html` · `docs/پیاده-سازی.html` · `docs/شرح-پروژه-دستیار-جلسه.html`
+- **Planned (Sprint 6+):** `docs/قابلیت‌های-پیشرفته-آینده.html` — facilitator guide, SOW alignment, sentiment
 - Spec: `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md`
 - Roadmap: `docs/نقشه-اسپرینت‌ها.html` (Sprints 2–6+)
 - **Voice:** آپلود/ضبط صوت → Gemini رونویسی → همان pipeline تحلیل (`POST /api/transcribe`)

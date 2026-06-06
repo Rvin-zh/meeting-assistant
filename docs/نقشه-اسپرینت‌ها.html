@@ -31,7 +31,7 @@
 <body>
 
 <h1>نقشه اسپرینت‌ها — ایده‌ها و اولویت</h1>
-<p class="meta">به‌روزرسانی ۱۴۰۵/۰۳/۰۶ · <a href="CHANGELOG.md">CHANGELOG</a> · Sprint 1 (MVP) تکمیل شده</p>
+<p class="meta">به‌روزرسانی ۱۴۰۵/۰۳/۰۶ · <a href="CHANGELOG.md">CHANGELOG</a> · Sprint 1 (MVP) تکمیل شده · <a href="قابلیت‌های-پیشرفته-آینده.html">قابلیت‌های پیشرفته</a></p>
 
 <div class="note">
   <strong>Sprint 1 (فعلی):</strong> transcript + <strong>رونویسی صوت Gemini</strong> · SQLite · ChromaDB · RAG تک‌جلسه · Jira KAN · UI فارسی RTL · ۱۳۷ تست واحد + ۱۲ live
@@ -226,11 +226,13 @@ flowchart LR
         A1["analysis_agent"]
         A2["rag_agent"]
         A3["jira_agent"]
-        A4["review_agent<br/>کیفیت خلاصه"]
-        A5["risk_agent<br/>تعارض/ریسک"]
+        A4["facilitation_agent<br/>راهنمای برگزارکننده"]
+        A5["alignment_agent<br/>SOW / قرارداد"]
+        A6["sentiment_agent<br/>لحن گویندگان"]
+        A7["review_agent"]
         O["orchestrator"]
     end
-    O --> A1 & A2 & A3 & A4 & A5
+    O --> A1 & A2 & A3 & A4 & A5 & A6 & A7
 </pre>
 </div>
 
@@ -246,7 +248,12 @@ flowchart LR
   <tr><td>نسخه‌گذاری تحلیل</td><td>ویرایش انسان روی خلاصه · re-run فقط بخشی</td></tr>
   <tr><td>حریم خصوصی</td><td>ماسک PII · retention · export GDPR</td></tr>
   <tr><td>on-prem</td><td>استقرار داخل شبکه · مدل self-hosted اختیاری</td></tr>
+  <tr><td><a href="قابلیت‌های-پیشرفته-آینده.html">راهنمای برگزارکننده</a></td><td><code>facilitation_agent</code> — جلسات کوتاه‌تر و مؤثرتر</td></tr>
+  <tr><td>هم‌راستایی SOW/قرارداد</td><td>آپلود PDF/DOCX · گزارش aligned / out-of-scope</td></tr>
+  <tr><td>Sentiment متن</td><td>لحن هر speaker · concern flags · ethics/RBAC</td></tr>
 </table>
+
+<p class="meta">جزئیات + نمودار: <a href="قابلیت‌های-پیشرفته-آینده.html">قابلیت‌های-پیشرفته-آینده.html</a></p>
 
 <h2>اولویت‌بندی پیشنهادی</h2>
 <table>
@@ -257,6 +264,9 @@ flowchart LR
   <tr><td>P1</td><td>ویرایش قبل از Jira create</td><td>اعتماد کاربر به خروجی AI</td></tr>
   <tr><td>P2</td><td>PostgreSQL + queue</td><td>وقتی ترافیک &gt; دمو</td></tr>
   <tr><td>P2</td><td>تقویم metadata + ایمیل خلاصه</td><td>کاهش اصطکاک ورود داده</td></tr>
+  <tr><td>P1</td><td>راهنمای برگزارکننده + facilitation_agent</td><td>تمایز فوری بدون infra سنگین</td></tr>
+  <tr><td>P1</td><td>آپلود SOW/قرارداد + alignment</td><td>ارزش برای PM و قراردادهای fixed-scope</td></tr>
+  <tr><td>P2</td><td>Sentiment تحلیل متن</td><td>بعد از RBAC و opt-in اخلاقی</td></tr>
   <tr><td>P3</td><td>multi-agent · Confluence</td><td>تمایز بلندمدت</td></tr>
 </table>
 
@@ -284,6 +294,7 @@ flowchart TD
   اسناد مرتبط:
   <a href="پروژه-اصلی.html">پروژه اصلی</a> ·
   <a href="پیاده-سازی.html">پیاده‌سازی</a> ·
+  <a href="قابلیت‌های-پیشرفته-آینده.html">قابلیت‌های پیشرفته</a> ·
   <a href="superpowers/specs/2026-05-26-meeting-assistant-design.md">design spec</a>
 </p>
 

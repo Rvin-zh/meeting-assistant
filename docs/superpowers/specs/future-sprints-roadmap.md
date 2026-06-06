@@ -1,6 +1,7 @@
 # Future Sprints Roadmap — Meeting Assistant
 
-**Updated:** 2026-05-26  
+**Updated:** 2026-06-04  
+**Advanced features (planned):** [2026-advanced-meeting-features.md](2026-advanced-meeting-features.md) · [قابلیت‌های-پیشرفته-آینده.html](../../قابلیت‌های-پیشرفته-آینده.html)
 **Out of scope (for now):** Live streaming STT during meetings, professional speaker diarization, separate Cloud Speech-to-Text pipeline. **In MVP:** upload/record audio → Gemini transcription via `POST /api/transcribe` (same `GOOGLE_API_KEY`).
 
 Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html) for the full Persian HTML version with diagrams.
@@ -64,6 +65,9 @@ Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نق
 ## Sprint 6+ — Product differentiation
 
 - **Agents:** `review_agent`, `risk_agent`, `orchestrator`
+- **`facilitation_agent`:** Post-meeting guide for organizers — efficient meetings, timeboxing, next agenda (see [advanced features spec](2026-advanced-meeting-features.md))
+- **`alignment_agent`:** Upload SOW/contracts; compare meeting decisions vs scope — aligned / out-of-scope / unclear
+- **`sentiment_agent`:** Per-speaker text tone analysis; concern flags; ethics/RBAC required
 - **Decision tracking** across meetings
 - **Action-item dashboard** (all open tasks)
 - **Meeting templates** (standup, retro, planning prompts)
@@ -85,8 +89,11 @@ Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نق
 | P0 | Jira assignee mapping |
 | P1 | Auth + workspace |
 | P1 | Pre-create task editing |
+| P1 | Facilitation guide (`facilitation_agent`) |
+| P1 | SOW/contract upload + alignment report |
 | P2 | PostgreSQL + job queue |
 | P2 | Calendar metadata + email summary |
+| P2 | Text sentiment per speaker (ethics opt-in) |
 | P3 | Multi-agent, wiki export |
 
 ---

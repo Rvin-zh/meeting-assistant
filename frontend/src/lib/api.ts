@@ -84,6 +84,15 @@ export interface TranscribeResponse {
   transcript: string;
 }
 
+export interface FacilitationReport {
+  what_went_well: string[];
+  improvements: string[];
+  next_meeting_agenda: string[];
+  timebox_suggestion: string;
+  coaching_summary: string;
+  facilitator_score: number | null;
+}
+
 export interface HealthResponse {
   status: string;
   google_api: boolean;
@@ -167,6 +176,8 @@ export const api = {
   deleteMeeting: (id: string) =>
     request<{ deleted: string }>(`/api/meetings/${id}`, { method: 'DELETE' }),
   getSpeakers: (id: string) => request<SpeakerStat[]>(`/api/meetings/${id}/speakers`),
+  getFacilitation: (id: string) =>
+    request<FacilitationReport>(`/api/meetings/${id}/facilitation`),
   exportUrl: (id: string) => `${API_BASE}/api/meetings/${id}/export`,
   ask: (id: string, question: string) =>
     request<RagAnswer>(`/api/meetings/${id}/ask`, {

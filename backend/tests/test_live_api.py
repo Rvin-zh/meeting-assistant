@@ -135,3 +135,27 @@ async def test_live_api_create_with_mocked_analysis(live_api_client):
     meeting_id = response.json()["id"]
     assert store.get(meeting_id) is not None
     assert store.get(meeting_id).analysis.summary == SAMPLE_ANALYSIS.summary
+
+
+@pytest.mark.asyncio
+async def test_live_api_facilitation(live_api_client):
+    """Real Gemini call for facilitation guide on a persisted meeting."""
+    client, store = live_api_client
+    record = MeetingRecord(
+        id="facilitation-live",
+        title="Live facilitation",
+        transcript=SAMPLE_TRANSCRIPT,
+        analysis=SAMPLE_ANALYSIS,
+        created_at=MeetingStore.now_iso(),
+        source="live-test",
+        meeting_type="standup",
+    )
+    store.save(record)
+
+    response = await client.get(f"/api/meetings/{record.id}/facilitation")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert isinstance(data["what_went_well"], list)
+    assert isinstance(data["improvements"], list)
+    assert len(data["coaching_summary"]) > 10
+    assert data["facilitator_score"] is None or 1 <= data["facilitator_score"] <= 5

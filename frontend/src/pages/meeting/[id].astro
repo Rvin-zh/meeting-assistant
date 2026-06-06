@@ -90,6 +90,7 @@ const exportUrl = meeting ? `${backendUrl}/api/meetings/${meeting.id}/export` : 
         <button class="tab active" data-tab="summary" type="button">خلاصه</button>
         <button class="tab" data-tab="tasks" type="button">تسک‌ها ({taskCount})</button>
         <button class="tab" data-tab="rag" type="button">پرسش</button>
+        <button class="tab" data-tab="facilitation" type="button">راهنمای جلسه</button>
       </div>
 
       <section id="panel-summary" class="card tab-panel">
@@ -188,6 +189,24 @@ const exportUrl = meeting ? `${backendUrl}/api/meetings/${meeting.id}/export` : 
           <button class="btn" type="submit" id="ask-btn">بپرس</button>
         </form>
       </section>
+
+      <section id="panel-facilitation" class="card tab-panel hidden">
+        <h2>راهنمای برگزارکننده — جلسه بعدی بهتر</h2>
+        <p class="muted">پیشنهادهای عملی بر اساس transcript، خلاصه، تصمیمات و مشارکت گویندگان.</p>
+        <div id="facilitation-loading" class="muted">برای دریافت پیشنهادها این تب را باز کنید…</div>
+        <div id="facilitation-content" class="hidden">
+          <div id="facilitation-score" class="facilitation-score"></div>
+          <p id="facilitation-summary" class="summary-box"></p>
+          <h3>چه چیزهایی خوب بود</h3>
+          <ul id="facilitation-well" class="point-list"></ul>
+          <h3>پیشنهاد بهبود</h3>
+          <ul id="facilitation-improve" class="point-list"></ul>
+          <h3>دستور کار پیشنهادی جلسه بعد</h3>
+          <ul id="facilitation-agenda" class="point-list"></ul>
+          <h3>پیشنهاد timebox</h3>
+          <div id="facilitation-timebox" class="summary-box"></div>
+        </div>
+      </section>
     </div>
   )}
 </Layout>
@@ -226,8 +245,53 @@ const exportUrl = meeting ? `${backendUrl}/api/meetings/${meeting.id}/export` : 
     }
 
     document.querySelectorAll('.tab').forEach((tab) => {
-      tab.addEventListener('click', () => switchTab((tab as HTMLElement).dataset.tab ?? 'summary'));
+      tab.addEventListener('click', () => {
+        const name = (tab as HTMLElement).dataset.tab ?? 'summary';
+        switchTab(name);
+        if (name === 'facilitation') loadFacilitation();
+      });
     });
+
+    let facilitationLoaded = false;
+    async function loadFacilitation() {
+      if (facilitationLoaded) return;
+      const loading = document.getElementById('facilitation-loading');
+      const content = document.getElementById('facilitation-content');
+      if (!loading || !content) return;
+      loading.textContent = 'در حال تولید راهنمای جلسه با Gemini…';
+      loading.classList.remove('hidden');
+      content.classList.add('hidden');
+      try {
+        const report = await api.getFacilitation(meetingId);
+        facilitationLoaded = true;
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        const scoreEl = document.getElementById('facilitation-score');
+        if (scoreEl && report.facilitator_score != null) {
+          scoreEl.innerHTML = `<span class="badge badge-type">امتیاز جلسه: ${report.facilitator_score}/۵</span>`;
+        }
+
+        const setList = (id: string, items: string[]) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = items.length
+            ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')
+            : '<li class="muted">—</li>';
+        };
+
+        const summaryEl = document.getElementById('facilitation-summary');
+        if (summaryEl) summaryEl.textContent = report.coaching_summary || '—';
+        setList('facilitation-well', report.what_went_well);
+        setList('facilitation-improve', report.improvements);
+        setList('facilitation-agenda', report.next_meeting_agenda);
+        const timeboxEl = document.getElementById('facilitation-timebox');
+        if (timeboxEl) timeboxEl.textContent = report.timebox_suggestion || '—';
+      } catch (e) {
+        loading.textContent = String(e);
+        showError(String(e));
+      }
+    }
 
     document.getElementById('btn-copy-summary')?.addEventListener('click', async () => {
       const text = document.getElementById('summary-text')?.textContent ?? '';
