@@ -106,6 +106,7 @@ class ChunkCitation(BaseModel):
 | POST | `/api/transcribe` | multipart audio → Gemini → transcript فارسی |
 | POST | `/api/meetings` | parse → Chroma index → `analysis_agent` |
 | GET | `/api/meetings/{id}` | جزئیات |
+| GET | `/api/meetings/{id}/facilitation` | `facilitation_agent` — راهنمای برگزارکننده ✅ |
 | POST | `/api/meetings/{id}/ask` | small-talk یا Chroma + `rag_agent` |
 | POST | `/api/meetings/{id}/jira/preview` | map tasks → issue payload (EN) |
 | POST | `/api/meetings/{id}/jira/create` | Jira REST |
@@ -228,11 +229,13 @@ project/
 ## ۱۲. Sprintهای آینده
 
 **جزئیات کامل:** [future-sprints-roadmap.md](future-sprints-roadmap.md) · [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html)  
-**خارج از scope (فعلاً):** STT زنده/streaming، diarization حرفه‌ای، Cloud Speech-to-Text جدا  
-**در MVP:** رونویسی فایل/ضبط با Gemini (`/api/transcribe`)
+**در MVP:** رونویسی فایل/ضبط با Gemini (`/api/transcribe`)  
+**برنامه Sprint 6+:** [قابلیت‌های پیشرفته](../../قابلیت‌های-پیشرفته-آینده.html) — facilitation guide، SOW alignment، sentiment  
+**خارج از scope (فعلاً):** STT زنده/streaming، diarization حرفه‌ای، Cloud Speech-to-Text جدا
 
 | Sprint | قابلیت |
 |--------|--------|
+| ۶+ | ✅ `facilitation_agent` — راهنمای برگزارکننده؛ `alignment_agent` — SOW/قرارداد؛ `sentiment_agent` — لحن گوینندگان ([spec](../../قابلیت‌های-پیشرفته-آینده.html)) |
 | ۲ | RAG چندجلسه، FTS آرشیو، export خلاصه، compare agent |
 | ۳ | Jira assignee map، `jira_agent`، OAuth، ویرایش قبل از create |
 | ۴ | Auth، workspace/RBAC، تقویم (metadata)، ایمیل/Slack |

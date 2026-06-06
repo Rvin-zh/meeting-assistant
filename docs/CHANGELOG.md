@@ -4,7 +4,9 @@
 
 | تاریخ | تغییر |
 |--------|--------|
-| ۱۴۰۵/۰۳/۰۶ | **Docs:** به‌روزرسانی HTML/spec/README — پشتیبانی voice با Gemini در MVP |
+| ۱۴۰۵/۰۳/۱۶ | **تست facilitation:** schema، agent prompt، API، live Gemini — `test_facilitation.py` |
+| ۱۴۰۵/۰۳/۱۶ | **نمونه transcript:** سه جلسه مصنوعی طولانی‌تر و پیچیده‌تر برای scrum، planning و review/retro |
+| ۱۴۰۵/۰۳/۰۶ | **Spec آینده:** راهنمای برگزارکننده، هم‌راستایی SOW/قرارداد، sentiment — `قابلیت‌های-پیشرفته-آینده.html` + نمودار |
 | ۱۴۰۵/۰۳/۰۶ | **Voice (Gemini):** `POST /api/transcribe` — آپلود/ضبط صوت → transcript؛ ingest متنی بدون تغییر |
 | ۱۴۰۵/۰۳/۰۶ | **Sprint 2/3 lite:** برچسب/پروژه، فیلتر، داشبورد تسک‌ها، قالب تحلیل، نگاشت Jira |
 | ۱۴۰۵/۰۳/۰۶ | **Sprint 3 lite:** نگاشت گوینده→Jira assignee، ذخیره jira_key، آمار مشارکت، حذف جلسه |

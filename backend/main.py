@@ -15,6 +15,7 @@ from backend.models.schemas import (
     ActionItem,
     AskRequest,
     CreateMeetingRequest,
+    FacilitationReport,
     JiraCreateRequest,
     MeetingRecord,
     MeetingType,
@@ -26,6 +27,7 @@ from backend.models.schemas import (
 from backend.services.assignee_map import AssigneeMapStore
 from backend.services.audio_transcribe import transcribe_audio
 from backend.services.export import meeting_to_markdown
+from backend.services.facilitation import build_facilitation_report
 from backend.services.ingest import ingest_meeting
 from backend.services.jira import create_issues, preview_issues
 from backend.services.meeting_store import MeetingStore
@@ -166,6 +168,17 @@ async def meeting_speakers(meeting_id: str) -> list[SpeakerStat]:
         raise HTTPException(status_code=404, detail="جلسه یافت نشد")
     stats = speaker_participation(record.transcript)
     return [SpeakerStat(**s) for s in stats]
+
+
+@app.get("/api/meetings/{meeting_id}/facilitation", response_model=FacilitationReport)
+async def meeting_facilitation(meeting_id: str) -> FacilitationReport:
+    record = meeting_store.get(meeting_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="جلسه یافت نشد")
+    try:
+        return await build_facilitation_report(record)
+    except Exception as exc:
+        raise http_exception_from_gemini_error(exc, context="راهنمای جلسه") from exc
 
 
 @app.get("/api/meetings/{meeting_id}", response_model=MeetingRecord)

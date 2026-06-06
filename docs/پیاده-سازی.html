@@ -159,6 +159,15 @@ is_small_talk("hello") → chitchat_agent, sources=[]
 chunks = chroma.query(meeting_id, question)
 rag_agent.run(context + question) → RagAnswer</code></pre>
 
+<h3>۶.۳ facilitation_agent ✅</h3>
+<p>پس از ingest، برگزارکننده می‌تواند پیشنهاد بهبود جلسه بعد را ببیند — لحن coaching، نه سرزنش.</p>
+<ul>
+  <li><strong>ورودی:</strong> transcript، <code>MeetingAnalysis</code>، آمار مشارکت گویندگان، نوع جلسه</li>
+  <li><strong>خروجی:</strong> <code>FacilitationReport</code> — positives، improvements، agenda بعد، timebox، امتیاز ۱–۵</li>
+  <li><strong>API:</strong> <span dir="ltr">GET /api/meetings/{id}/facilitation</span></li>
+  <li><strong>UI:</strong> تب «راهنمای جلسه» در صفحه جلسه (lazy load)</li>
+</ul>
+
 <div class="note">
   Jira create از API route مستقیم است. Issueها به <strong>انگلیسی</strong> (<code>title_en</code>, <code>context_en</code>) برای خوانایی LTR در Jira — UI همچنان فارسی.
 </div>
@@ -176,6 +185,7 @@ flowchart TB
         tab1["خلاصه و تصمیمات"]
         tab2["تسک‌ها + Jira"]
         tab3["پرسش از جلسه"]
+        tab4["راهنمای برگزارکننده"]
     end
     home --> meeting
     meeting --> tabs
@@ -223,6 +233,7 @@ flowchart TB
 <table>
   <tr><th>Method</th><th>Path</th><th>توضیح</th></tr>
   <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings</td><td>لیست جلسات</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/{id}/facilitation</td><td>راهنمای برگزارکننده — <code>facilitation_agent</code></td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/transcribe</td><td>رونویسی فایل صوتی با Gemini (همان API key)</td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings</td><td>ingest + analysis_agent</td></tr>
   <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/ask</td><td>rag_agent</td></tr>
@@ -267,7 +278,7 @@ PUBLIC_BACKEND_URL=http://127.0.0.1:8000</code></pre>
 <h2>۱۲. تست‌ها</h2>
 <table>
   <tr><th>نوع</th><th>دستور</th><th>تعداد</th></tr>
-  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۱۳۷</td></tr>
+  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۱۴۰+</td></tr>
   <tr><td>live API</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۱۲ (HTTP + سرویس)</td></tr>
   <tr><td>همه</td><td dir="ltr">./scripts/run-all-tests.sh</td><td>واحد + live</td></tr>
 </table>

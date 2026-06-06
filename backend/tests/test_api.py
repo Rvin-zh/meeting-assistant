@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import app
-from backend.models.schemas import MeetingAnalysis, MeetingRecord
+from backend.models.schemas import FacilitationReport, MeetingAnalysis, MeetingRecord
 from backend.tests.conftest import SAMPLE_ANALYSIS, SAMPLE_RAG_ANSWER, SAMPLE_TRANSCRIPT
 
 
@@ -197,6 +197,33 @@ class TestCreateMeeting:
             )
         assert response.status_code == 403
         assert "billing" in response.json()["detail"]
+
+
+class TestFacilitationEndpoint:
+    def test_facilitation_not_found(self, client: TestClient):
+        response = client.get("/api/meetings/nope/facilitation")
+        assert response.status_code == 404
+
+    def test_facilitation_returns_coaching_fields(
+        self, client: TestClient, sample_record
+    ):
+        report = FacilitationReport(
+            what_went_well=["نکته مثبت"],
+            improvements=["پیشنهاد"],
+            next_meeting_agenda=["دستور کار"],
+            timebox_suggestion="۳۰ دقیقه",
+            coaching_summary="جمع‌بندی",
+            facilitator_score=3,
+        )
+        with patch(
+            "backend.main.build_facilitation_report",
+            new=AsyncMock(return_value=report),
+        ):
+            response = client.get(f"/api/meetings/{sample_record.id}/facilitation")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["what_went_well"] == ["نکته مثبت"]
+        assert body["facilitator_score"] == 3
 
 
 class TestSyntheticEndpoint:

@@ -115,6 +115,15 @@ class TranscribeResponse(BaseModel):
     transcript: str
 
 
+class FacilitationReport(BaseModel):
+    what_went_well: list[str] = Field(default_factory=list)
+    improvements: list[str] = Field(default_factory=list)
+    next_meeting_agenda: list[str] = Field(default_factory=list)
+    timebox_suggestion: str = ""
+    coaching_summary: str = ""
+    facilitator_score: int | None = Field(default=None, ge=1, le=5)
+
+
 class JiraPreviewIssue(BaseModel):
     summary: str
     description: str
