@@ -1,0 +1,5 @@
+flowchart LR
+    D["New data /<br/>golden transcripts"] --> T["Prompt tuning /<br/>eval"]
+    T --> DEP["Deploy"]
+    DEP --> MON["Monitor quality"]
+    MON --> D

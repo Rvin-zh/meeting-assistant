@@ -228,14 +228,14 @@ project/
 
 ## ۱۲. Sprintهای آینده
 
-**جزئیات کامل:** [future-sprints-roadmap.md](future-sprints-roadmap.md) · [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html)  
+**جزئیات کامل:** [future-sprints-roadmap.md](future-sprints-roadmap.md) · [03-roadmap-and-future-work.html](../../03-roadmap-and-future-work.html)  
 **در MVP:** رونویسی فایل/ضبط با Gemini (`/api/transcribe`)  
-**برنامه Sprint 6+:** [قابلیت‌های پیشرفته](../../قابلیت‌های-پیشرفته-آینده.html) — facilitation guide، SOW alignment، sentiment  
+**برنامه Sprint 6+:** [Roadmap & Future Work](../../03-roadmap-and-future-work.html) — facilitation guide، SOW alignment، sentiment  
 **خارج از scope (فعلاً):** STT زنده/streaming، diarization حرفه‌ای، Cloud Speech-to-Text جدا
 
 | Sprint | قابلیت |
 |--------|--------|
-| ۶+ | ✅ `facilitation_agent` — راهنمای برگزارکننده؛ `alignment_agent` — SOW/قرارداد؛ `sentiment_agent` — لحن گوینندگان ([spec](../../قابلیت‌های-پیشرفته-آینده.html)) |
+| ۶+ | ✅ `facilitation_agent` — راهنمای برگزارکننده؛ `alignment_agent` — SOW/قرارداد؛ `sentiment_agent` — لحن گوینندگان ([spec](../../03-roadmap-and-future-work.html)) |
 | ۲ | RAG چندجلسه، FTS آرشیو، export خلاصه، compare agent |
 | ۳ | Jira assignee map، `jira_agent`، OAuth، ویرایش قبل از create |
 | ۴ | Auth، workspace/RBAC، تقویم (metadata)، ایمیل/Slack |
@@ -248,9 +248,9 @@ project/
 
 | سند | نقش |
 |-----|-----|
-| `docs/پروژه-اصلی.html` | چشم‌انداز |
-| `docs/پیاده-سازی.html` | جزئیات فنی |
-| `docs/شرح-پروژه-دستیار-جلسه.html` | دوره / RAG |
+| `docs/01-project-overview.html` | چشم‌انداز و چارچوب AI-native |
+| `docs/02-implementation.html` | جزئیات فنی |
+| `docs/03-roadmap-and-future-work.html` | نقشه راه و قابلیت‌های پیشرفته |
 | `docs/CHANGELOG.md` | **با هر تغییر معماری به‌روز شود** |
 | این spec | مرجع مهندسی |
 

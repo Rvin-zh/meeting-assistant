@@ -1,10 +1,10 @@
 # Future Sprints Roadmap — Meeting Assistant
 
 **Updated:** 2026-06-04  
-**Advanced features (planned):** [2026-advanced-meeting-features.md](2026-advanced-meeting-features.md) · [قابلیت‌های-پیشرفته-آینده.html](../../قابلیت‌های-پیشرفته-آینده.html)
+**Advanced features (planned):** [2026-advanced-meeting-features.md](2026-advanced-meeting-features.md) · [03-roadmap-and-future-work.html](../../03-roadmap-and-future-work.html)
 **Out of scope (for now):** Live streaming STT during meetings, professional speaker diarization, separate Cloud Speech-to-Text pipeline. **In MVP:** upload/record audio → Gemini transcription via `POST /api/transcribe` (same `GOOGLE_API_KEY`).
 
-Sprint 1 (MVP) is complete. See [نقشه-اسپرینت‌ها.html](../../نقشه-اسپرینت‌ها.html) for the full Persian HTML version with diagrams.
+Sprint 1 (MVP) is complete. See [03-roadmap-and-future-work.html](../../03-roadmap-and-future-work.html) for the full English HTML version with diagrams.
 
 ---
 
