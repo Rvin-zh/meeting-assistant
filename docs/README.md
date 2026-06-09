@@ -2,13 +2,13 @@
 
 ## فهرست
 
-سه سند اصلی به **انگلیسی** (مناسب ارائه/فارغ‌التحصیلی) — هر کدام یک PDF متناظر در `pdf/`:
+سه سند اصلی به **فارسی** (مناسب ارائه/فارغ‌التحصیلی) — هر کدام یک PDF متناظر در `pdf/`:
 
 | فایل | محتوا |
 |------|--------|
-| [01-project-overview.html](01-project-overview.html) | **Project Overview & Vision** — مسئله، محصول، معماری، چارچوب AI-native، معیار موفقیت |
-| [02-implementation.html](02-implementation.html) | **Technical Implementation** — جریان داده، RAG، agents، SQLite/Chroma، API، UI، تست‌ها، مدیریت خطا |
-| [03-roadmap-and-future-work.html](03-roadmap-and-future-work.html) | **Roadmap & Future Work** — اسپرینت ۲–۶+، راهنمای برگزارکننده، SOW/قرارداد، sentiment، MLOps، ایده‌های پژوهشی |
+| [01-project-overview.html](01-project-overview.html) | **شرح پروژه و چشم‌انداز** — مسئله، محصول، معماری، چارچوب AI-native، معیار موفقیت |
+| [02-implementation.html](02-implementation.html) | **پیاده‌سازی فنی** — جریان داده، RAG، عامل‌ها، SQLite/Chroma، API، UI، تست‌ها، مدیریت خطا |
+| [03-roadmap-and-future-work.html](03-roadmap-and-future-work.html) | **نقشه راه و کارهای آینده** — اسپرینت ۲–۶+، راهنمای برگزارکننده، SOW/قرارداد، sentiment، MLOps، ایده‌های پژوهشی |
 
 منابع تکمیلی:
 

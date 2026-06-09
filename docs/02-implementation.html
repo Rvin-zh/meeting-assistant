@@ -1,33 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meeting Assistant — Technical Implementation</title>
+  <title>دستیار جلسه — پیاده‌سازی فنی</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
   <style>
     :root { --text: #1a1a1a; --muted: #555; --border: #ddd; --bg: #fafafa; --accent: #059669; }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.7; color: var(--text); max-width: 940px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; background: #fff; }
-    h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; line-height: 1.25; }
-    h2 { font-size: 1.45rem; margin-top: 2.75rem; color: #111; border-left: 4px solid var(--accent); padding-left: 0.6rem; }
-    h3 { font-size: 1.12rem; margin-top: 1.75rem; color: #1f2937; }
-    p, li { font-size: 1rem; }
+    body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.95; color: var(--text); max-width: 940px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; background: #fff; }
+    h1 { font-size: 1.95rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.6rem; line-height: 1.5; }
+    h2 { font-size: 1.4rem; margin-top: 2.75rem; color: #111; border-right: 4px solid var(--accent); padding-right: 0.6rem; }
+    h3 { font-size: 1.13rem; margin-top: 1.75rem; color: #1f2937; }
+    h4 { font-size: 1.02rem; margin-top: 1.25rem; color: #374151; }
+    p, li { font-size: 1.02rem; }
     a { color: #2563eb; text-decoration: none; }
     a:hover { text-decoration: underline; }
-    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
-    th, td { border: 1px solid var(--border); padding: 0.55rem 0.8rem; text-align: left; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.96rem; }
+    th, td { border: 1px solid var(--border); padding: 0.55rem 0.8rem; text-align: right; vertical-align: top; }
     th { background: var(--bg); }
+    code, pre, .ltr, .mermaid-wrap { direction: ltr; text-align: left; unicode-bidi: embed; }
     code { background: #f0f0f0; padding: 0.12rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
     pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
     pre code { background: none; padding: 0; }
     .mermaid-wrap { margin: 1.5rem 0; padding: 1rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
-    .note { background: #ecfdf5; border-left: 4px solid var(--accent); padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
-    .cut { background: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
-    .future { background: #fefce8; border-left: 4px solid #ca8a04; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
+    .note { background: #ecfdf5; border-right: 4px solid var(--accent); padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
+    .cut { background: #fef2f2; border-right: 4px solid #dc2626; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
+    .future { background: #fefce8; border-right: 4px solid #ca8a04; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
     .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
     nav.toc { background: var(--bg); padding: 1rem 1.4rem; border-radius: 8px; margin: 1.5rem 0 2.5rem; border: 1px solid var(--border); }
-    nav.toc ol { margin: 0.3rem 0; padding-left: 1.4rem; columns: 2; }
+    nav.toc ol { margin: 0.3rem 0; padding-right: 1.4rem; columns: 2; }
     nav.toc a { color: #2563eb; }
     .screenshot-grid { display: grid; gap: 1.5rem; margin: 1.5rem 0; }
     .screenshot-grid figure { margin: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #111; }
@@ -41,70 +44,70 @@
 </head>
 <body>
 
-<h1>Meeting Assistant<br>Technical Implementation</h1>
+<h1>دستیار جلسه<br>پیاده‌سازی فنی</h1>
 <p class="meta">
-  Document 2 of 3 · Engineering reference for the current MVP ·
-  <a href="01-project-overview.html">Overview</a> ·
-  <a href="03-roadmap-and-future-work.html">Roadmap</a> ·
-  <a href="CHANGELOG.md">Changelog</a>
+  سند ۲ از ۳ · مرجع مهندسی MVP فعلی ·
+  <a href="01-project-overview.html">شرح پروژه</a> ·
+  <a href="03-roadmap-and-future-work.html">نقشه راه</a> ·
+  <a href="CHANGELOG.md">CHANGELOG</a>
 </p>
 
 <p>
-  This document is the engineering reference for the running system: how data flows from input to Jira,
-  how each component is built, the API surface, the user interface, error handling, and the test suite.
-  For the motivation and product vision see <a href="01-project-overview.html">Document 1</a>; for what
-  comes next see <a href="03-roadmap-and-future-work.html">Document 3</a>.
+  این سند مرجع مهندسی سامانه‌ی در حال اجراست: اینکه داده چگونه از ورودی تا Jira جریان می‌یابد، هر مؤلفه
+  چگونه ساخته شده، سطح API، رابط کاربری، مدیریت خطا، و مجموعه‌ی تست‌ها. برای انگیزه و چشم‌انداز محصول به
+  <a href="01-project-overview.html">سند ۱</a> و برای کارهای آینده به
+  <a href="03-roadmap-and-future-work.html">سند ۳</a> مراجعه کنید.
 </p>
 
 <nav class="toc">
-  <strong>Contents</strong>
+  <strong>فهرست</strong>
   <ol>
-    <li><a href="#goal">System Goal</a></li>
-    <li><a href="#scope">MVP vs. Full Vision (YAGNI)</a></li>
-    <li><a href="#flow">End-to-End Data Flow</a></li>
-    <li><a href="#voice">Voice Transcription</a></li>
-    <li><a href="#sqlite">SQLite Meeting Store</a></li>
-    <li><a href="#chroma">ChromaDB Vector Store</a></li>
-    <li><a href="#agents">Pydantic-AI Agents</a></li>
-    <li><a href="#ui">User Interface</a></li>
-    <li><a href="#api">API Endpoints</a></li>
-    <li><a href="#synthetic">Synthetic Data</a></li>
-    <li><a href="#env">Environment Configuration</a></li>
-    <li><a href="#structure">Project Structure</a></li>
-    <li><a href="#run">Running the System</a></li>
-    <li><a href="#tests">Tests</a></li>
-    <li><a href="#errors">Error Handling</a></li>
+    <li><a href="#goal">۱. هدف سامانه</a></li>
+    <li><a href="#scope">۲. MVP در برابر نسخه کامل (YAGNI)</a></li>
+    <li><a href="#flow">۳. جریان داده End-to-End</a></li>
+    <li><a href="#voice">۴. رونویسی صوت</a></li>
+    <li><a href="#sqlite">۵. SQLite — ذخیره جلسات</a></li>
+    <li><a href="#chroma">۶. ChromaDB — Vector Store</a></li>
+    <li><a href="#agents">۷. عامل‌های Pydantic AI</a></li>
+    <li><a href="#ui">۸. رابط کاربری (Astro SSR)</a></li>
+    <li><a href="#api">۹. Endpointهای API</a></li>
+    <li><a href="#synthetic">۱۰. داده مصنوعی</a></li>
+    <li><a href="#env">۱۱. تنظیمات محیط</a></li>
+    <li><a href="#structure">۱۲. ساختار پروژه</a></li>
+    <li><a href="#run">۱۳. اجرای سامانه</a></li>
+    <li><a href="#tests">۱۴. تست‌ها</a></li>
+    <li><a href="#errors">۱۵. مدیریت خطا</a></li>
   </ol>
 </nav>
 
-<h2 id="goal">1. System Goal</h2>
+<h2 id="goal">۱. هدف سامانه</h2>
 <p>
-  Convert a Persian meeting transcript into operational output: a <strong>summary</strong>,
-  <strong>tasks</strong>, a <strong>RAG question-and-answer layer</strong>, and <strong>Jira
-  issues</strong> — through a pipeline that is fast enough to demonstrate live.
+  تبدیل transcript جلسات فارسی به خروجی عملیاتی: <strong>خلاصه</strong>، <strong>تسک</strong>،
+  <strong>پرسش‌وپاسخ RAG</strong>، و <strong>issueهای Jira</strong> — از طریق خط لوله‌ای که برای دموی
+  زنده به‌اندازه‌ی کافی سریع است.
 </p>
 
-<h2 id="scope">2. MVP vs. Full Vision (YAGNI)</h2>
+<h2 id="scope">۲. MVP در برابر نسخه کامل (YAGNI)</h2>
 <p>
-  The original concept document described a maximal system. The MVP keeps only what is needed to prove the
-  value, and records explicitly what was deferred — a disciplined "you aren't gonna need it" stance.
+  سند مفهومی اولیه یک سامانه‌ی حداکثری را توصیف می‌کرد. MVP فقط آنچه را که برای اثبات ارزش لازم است نگه
+  می‌دارد و به‌صراحت ثبت می‌کند که چه چیزی به تعویق افتاده — یک موضع منضبط «به آن نیاز نخواهی داشت».
 </p>
 <table>
-  <tr><th>Capability</th><th>Full vision (concept doc)</th><th>Current MVP</th></tr>
-  <tr><td>Input</td><td>Live recording + streaming STT</td><td>Transcript (paste + text file) and <strong>audio</strong> (upload/record &rarr; Gemini)</td></tr>
-  <tr><td>Analysis</td><td>GPT-4 / mixed models</td><td>Gemini Flash + Pydantic AI</td></tr>
-  <tr><td>Search / vector DB</td><td>ElasticSearch</td><td><strong>ChromaDB</strong> embedded (<code>data/chroma/</code>)</td></tr>
-  <tr><td>Task tracking</td><td>Jira + Trello + Asana + …</td><td>Jira only (<code>KAN</code>) — issues in English</td></tr>
-  <tr><td>RAG</td><td>Whole-organization archive</td><td>Single meeting · multi-meeting planned (Sprint 2)</td></tr>
-  <tr><td>Calendar / Teams</td><td>Full integration</td><td>Deferred (later sprint)</td></tr>
-  <tr><td>Dashboard / notifications</td><td>Weekly reports</td><td>Cross-meeting task view today · richer reports deferred</td></tr>
+  <tr><th>قابلیت</th><th>نسخه کامل (سند مفهومی)</th><th>MVP فعلی</th></tr>
+  <tr><td>ورودی</td><td>ضبط زنده + STT جریانی</td><td>transcript (paste + فایل متنی) و <strong>صوت</strong> (آپلود/ضبط &larr; Gemini)</td></tr>
+  <tr><td>تحلیل</td><td>GPT-4 / مدل‌های متنوع</td><td>Gemini Flash + Pydantic AI</td></tr>
+  <tr><td>جستجو / Vector DB</td><td>ElasticSearch</td><td><strong>ChromaDB</strong> embedded (<code>data/chroma/</code>)</td></tr>
+  <tr><td>ردیابی تسک</td><td>Jira + Trello + Asana + …</td><td>فقط Jira (<code>KAN</code>) — issueها انگلیسی</td></tr>
+  <tr><td>RAG</td><td>آرشیو کل سازمان</td><td>تک‌جلسه · چندجلسه برنامه‌ریزی‌شده (Sprint 2)</td></tr>
+  <tr><td>تقویم / Teams</td><td>یکپارچگی کامل</td><td>به تعویق افتاده (sprint بعد)</td></tr>
+  <tr><td>داشبورد / اعلان</td><td>گزارش هفتگی</td><td>داشبورد تسک cross-meeting امروز · گزارش‌های غنی‌تر بعداً</td></tr>
 </table>
 
-<h2 id="flow">3. End-to-End Data Flow</h2>
+<h2 id="flow">۳. جریان داده End-to-End</h2>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 sequenceDiagram
-    participant U as User
+    participant U as کاربر
     participant UI as Astro (RTL)
     participant API as FastAPI
     participant G as Gemini
@@ -113,77 +116,77 @@ sequenceDiagram
     participant C as ChromaDB
     participant J as Jira KAN
 
-    U->>UI: transcript / audio / sample meeting
-    opt audio file or recording
+    U->>UI: transcript / صوت / جلسه نمونه
+    opt فایل یا ضبط صوتی
         UI->>API: POST /api/transcribe
-        API->>G: Gemini audio → text
+        API->>G: Gemini audio → متن
         API-->>UI: transcript
     end
     UI->>API: POST /api/meetings
     API->>API: parse + chunk + embed
     API->>C: index chunks
     API->>AA: run(transcript)
-    AA-->>UI: summary + tasks (SSR)
-    U->>UI: RAG question
+    AA-->>UI: خلاصه + تسک‌ها (SSR)
+    U->>UI: پرسش RAG
     UI->>API: POST /ask
     API->>C: query by meeting_id
-    API->>RA: context + question
-    RA-->>UI: natural answer + footnote
-    U->>UI: confirm task
+    API->>RA: context + پرسش
+    RA-->>UI: پاسخ طبیعی + footnote
+    U->>UI: تأیید تسک
     UI->>API: POST /jira/create
-    API->>J: new issue
+    API->>J: issue جدید
 </pre>
 </div>
 
-<h2 id="voice">4. Voice Transcription (Gemini)</h2>
+<h2 id="voice">۴. رونویسی صوت (Gemini)</h2>
 <p>
-  Audio input is a <strong>separate step before ingest</strong>, so pasting text and loading sample
-  meetings remain unchanged. It reuses the same <code>GOOGLE_API_KEY</code> and <code>GEMINI_MODEL</code>
-  — no separate speech-to-text service.
+  ورودی صوت یک <strong>مرحله‌ی جدا پیش از ingest</strong> است، تا paste متنی و بارگذاری جلسات نمونه بدون
+  تغییر بمانند. همان <code>GOOGLE_API_KEY</code> و <code>GEMINI_MODEL</code> استفاده می‌شود — بدون سرویس
+  speech-to-text جدا.
 </p>
 <table>
-  <tr><th>Step</th><th>Detail</th></tr>
-  <tr><td>UI</td><td>Upload <code>mp3, wav, m4a, ogg, webm, flac</code> or use the <strong>Record</strong> button (MediaRecorder).</td></tr>
-  <tr><td>API</td><td><code>POST /api/transcribe</code> — multipart <code>file</code> &rarr; Gemini <code>generateContent</code> with inline audio.</td></tr>
-  <tr><td>Output</td><td>Persian transcript formatted as <code>[MM:SS] name: text</code>, editable before analysis.</td></tr>
-  <tr><td>Limit</td><td>Up to <strong>20&nbsp;MB</strong> (<code>MAX_AUDIO_BYTES</code>).</td></tr>
-  <tr><td>After transcription</td><td>The normal <code>POST /api/meetings</code> path — analysis, Chroma, RAG, Jira.</td></tr>
+  <tr><th>مرحله</th><th>جزئیات</th></tr>
+  <tr><td>UI</td><td>آپلود <code dir="ltr">mp3, wav, m4a, ogg, webm, flac</code> یا دکمه‌ی <strong>ضبط</strong> (MediaRecorder).</td></tr>
+  <tr><td>API</td><td><code dir="ltr">POST /api/transcribe</code> — multipart <code>file</code> &larr; Gemini <code>generateContent</code> با صوت inline.</td></tr>
+  <tr><td>خروجی</td><td>transcript فارسی با قالب <code dir="ltr">[MM:SS] name: text</code>، قابل ویرایش پیش از تحلیل.</td></tr>
+  <tr><td>محدودیت</td><td>حداکثر <strong>۲۰ مگابایت</strong> (<code>MAX_AUDIO_BYTES</code>).</td></tr>
+  <tr><td>پس از رونویسی</td><td>همان مسیر <code dir="ltr">POST /api/meetings</code> — تحلیل، Chroma، RAG، Jira.</td></tr>
 </table>
 <div class="note">
-  <strong>Difference from professional STT:</strong> diarization and live streaming are not part of the
-  MVP; for demos and pre-recorded audio, single-shot Gemini transcription is sufficient.
+  <strong>تفاوت با STT حرفه‌ای:</strong> diarization و جریان زنده بخشی از MVP نیستند؛ برای دمو و صوت
+  ضبط‌شده، رونویسی تک‌مرحله‌ای Gemini کافی است.
 </div>
 
-<h2 id="sqlite">5. SQLite — Meeting Store</h2>
+<h2 id="sqlite">۵. SQLite — ذخیره جلسات</h2>
 <table>
-  <tr><th>Item</th><th>Value</th></tr>
-  <tr><td>File</td><td><code>data/meetings.db</code></td></tr>
-  <tr><td>Table</td><td><code>meetings</code> — transcript, summary, key_points, decisions, tasks (JSON)</td></tr>
-  <tr><td>Migration</td><td>Legacy <code>data/meetings/*.json</code> files are imported once on first run.</td></tr>
+  <tr><th>مورد</th><th>مقدار</th></tr>
+  <tr><td>فایل</td><td><code dir="ltr">data/meetings.db</code></td></tr>
+  <tr><td>جدول</td><td><code dir="ltr">meetings</code> — transcript، summary، key_points، decisions، tasks (JSON)</td></tr>
+  <tr><td>مهاجرت</td><td>فایل‌های قدیمی <code dir="ltr">data/meetings/*.json</code> یک‌بار در اولین اجرا import می‌شوند.</td></tr>
 </table>
 <p>
-  SQLite gives the MVP durable, zero-operations persistence. The schema is deliberately simple so the
-  Sprint 5 migration to PostgreSQL (via SQLAlchemy + Alembic) is straightforward.
+  SQLite به MVP پایداری بادوام و بدون عملیات می‌دهد. schema عمداً ساده است تا مهاجرت Sprint 5 به
+  PostgreSQL (با SQLAlchemy + Alembic) سرراست باشد.
 </p>
 
-<h2 id="chroma">6. ChromaDB — Vector Store</h2>
+<h2 id="chroma">۶. ChromaDB — Vector Store</h2>
 <div class="note">
-  <strong>Why Chroma?</strong> An earlier version used a hand-written JSON store with a Python cosine loop
-  — slow for demos and hard to maintain. ChromaDB is embedded: no separate server, persisted in
-  <code>data/chroma/</code>, with fast HNSW search.
+  <strong>چرا Chroma؟</strong> نسخه‌ی قبلی از یک ذخیره‌ی JSON دستی با حلقه‌ی cosine در Python استفاده
+  می‌کرد — برای دمو کند و برای نگهداری سخت. ChromaDB embedded است: بدون سرور جدا، ذخیره در
+  <code dir="ltr">data/chroma/</code>، و جستجوی سریع HNSW.
 </div>
 <table>
-  <tr><th>Item</th><th>Value</th></tr>
-  <tr><td>Library</td><td><code>chromadb</code></td></tr>
-  <tr><td>Collection</td><td><code>meeting_chunks</code></td></tr>
-  <tr><td>Filter</td><td><code>metadata.meeting_id</code></td></tr>
-  <tr><td>Embedding</td><td><code>gemini-embedding-001</code> (from Google API; Chroma only stores/searches)</td></tr>
-  <tr><td>Distance</td><td>cosine (HNSW)</td></tr>
+  <tr><th>مورد</th><th>مقدار</th></tr>
+  <tr><td>کتابخانه</td><td><code dir="ltr">chromadb</code></td></tr>
+  <tr><td>Collection</td><td><code dir="ltr">meeting_chunks</code></td></tr>
+  <tr><td>فیلتر</td><td><code dir="ltr">metadata.meeting_id</code></td></tr>
+  <tr><td>Embedding</td><td><code dir="ltr">gemini-embedding-001</code> (از Google API؛ Chroma فقط ذخیره/جستجو)</td></tr>
+  <tr><td>فاصله</td><td>cosine (HNSW)</td></tr>
 </table>
 
-<h2 id="agents">7. Pydantic-AI Agents</h2>
+<h2 id="agents">۷. عامل‌های Pydantic AI</h2>
 
-<h3>7.1 analysis_agent</h3>
+<h3>۷.۱ analysis_agent</h3>
 <pre><code>from pydantic import BaseModel
 from pydantic_ai import Agent
 
@@ -197,133 +200,130 @@ class MeetingAnalysis(BaseModel):
 analysis_agent = Agent(
     'google:gemini-3.5-flash',
     output_type=MeetingAnalysis,
-    system_prompt='Analyze a Persian meeting transcript. Use only the text.',
+    system_prompt='تحلیل transcript جلسه فارسی. فقط بر اساس متن.',
 )</code></pre>
 
-<h3>7.2 RAG — smart behavior</h3>
+<h3>۷.۲ RAG — رفتار هوشمند</h3>
 <ul>
-  <li><strong>Greetings / hello:</strong> no transcript search — a short reply that invites a real
-      question about the meeting.</li>
-  <li><strong>Meeting question:</strong> Chroma top-4 &rarr; internal context for the LLM (the raw
-      transcript is never dumped into the UI).</li>
-  <li><strong>Answer:</strong> natural Persian with attribution ("Ali said…") and a short footnote when
-      useful.</li>
+  <li><strong>سلام / hello:</strong> بدون جستجو در transcript — پاسخ کوتاهی که به پرسش واقعی درباره‌ی
+      جلسه دعوت می‌کند.</li>
+  <li><strong>پرسش جلسه:</strong> Chroma top-4 &larr; context داخلی برای LLM (transcript خام هرگز در UI
+      نمایش داده نمی‌شود).</li>
+  <li><strong>پاسخ:</strong> فارسی طبیعی با نسبت‌دادن («علی گفت…») و در صورت نیاز یک footnote کوتاه.</li>
 </ul>
-<pre><code># small-talk detection
+<pre><code># تشخیص small talk
 is_small_talk("hello") -> chitchat_agent, sources=[]
 
-# real question
+# پرسش واقعی
 chunks = chroma.query(meeting_id, question)
 rag_agent.run(context + question) -> RagAnswer</code></pre>
 
-<h3>7.3 facilitation_agent</h3>
+<h3>۷.۳ facilitation_agent</h3>
 <p>
-  After ingest, the organizer can see suggestions for improving the next meeting — a coaching tone, not a
-  scolding one.
+  پس از ingest، برگزارکننده می‌تواند پیشنهادهای بهبود جلسه‌ی بعد را ببیند — با لحن مربی‌گری، نه سرزنش.
 </p>
 <ul>
-  <li><strong>Input:</strong> transcript, <code>MeetingAnalysis</code>, speaker participation stats,
-      meeting type.</li>
-  <li><strong>Output:</strong> <code>FacilitationReport</code> — what went well, improvements, next-meeting
-      agenda, timebox suggestion, coaching summary, and an optional 1–5 facilitator score.</li>
-  <li><strong>API:</strong> <code>GET /api/meetings/{id}/facilitation</code></li>
-  <li><strong>UI:</strong> a "Facilitator Guide" tab on the meeting page (lazy-loaded).</li>
+  <li><strong>ورودی:</strong> transcript، <code>MeetingAnalysis</code>، آمار مشارکت گویندگان، نوع جلسه.</li>
+  <li><strong>خروجی:</strong> <code>FacilitationReport</code> — نکات مثبت، بهبودها، دستور کار جلسه‌ی بعد،
+      پیشنهاد timebox، خلاصه‌ی مربی‌گری، و امتیاز اختیاری ۱ تا ۵ برگزارکننده.</li>
+  <li><strong>API:</strong> <code dir="ltr">GET /api/meetings/{id}/facilitation</code></li>
+  <li><strong>UI:</strong> تب «راهنمای جلسه» در صفحه‌ی جلسه (lazy load).</li>
 </ul>
 <div class="note">
-  Jira creation is a direct API route. Issues are written in <strong>English</strong> (<code>title_en</code>,
-  <code>context_en</code>) for clean left-to-right display in Jira, while the UI stays Persian.
+  ایجاد Jira از یک route مستقیم API است. issueها به <strong>انگلیسی</strong> (<code>title_en</code>,
+  <code>context_en</code>) نوشته می‌شوند تا نمایش چپ‌به‌راست در Jira تمیز باشد، در حالی که UI فارسی می‌ماند.
 </div>
 
-<h2 id="ui">8. User Interface (Astro SSR)</h2>
+<h2 id="ui">۸. رابط کاربری (Astro SSR)</h2>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart TB
-    subgraph pages ["Pages — RTL"]
-        home["/ home"]
+    subgraph pages ["صفحات — RTL"]
+        home["/ خانه"]
         meeting["/meeting/id"]
         tasks["/tasks"]
         settings["/settings"]
     end
-    subgraph tabs ["Meeting tabs"]
-        tab1["Summary &amp; decisions"]
-        tab2["Tasks + Jira"]
-        tab3["Ask the meeting"]
-        tab4["Facilitator guide"]
+    subgraph tabs ["تب‌های جلسه"]
+        tab1["خلاصه و تصمیمات"]
+        tab2["تسک‌ها + Jira"]
+        tab3["پرسش از جلسه"]
+        tab4["راهنمای برگزارکننده"]
     end
     home --> meeting
     meeting --> tabs
 </pre>
 </div>
-<p><strong>RTL / LTR rules:</strong></p>
+<p><strong>قواعد RTL/LTR:</strong></p>
 <ul>
-  <li><code>html lang="fa" dir="rtl"</code> — Persian text is right-aligned.</li>
-  <li>Code, env vars, URLs, and API names are wrapped in <code>dir="ltr"</code>.</li>
-  <li>Mermaid diagrams render inside an LTR wrapper.</li>
+  <li><code dir="ltr">html lang="fa" dir="rtl"</code> — متن فارسی راست‌چین.</li>
+  <li>کد، متغیر محیطی، URL و نام API در <code dir="ltr">dir="ltr"</code> قرار می‌گیرند.</li>
+  <li>نمودارهای Mermaid در یک wrapper با جهت LTR رندر می‌شوند.</li>
 </ul>
 <p>
-  The <code>/meeting/[id]</code> page fetches its data on the <strong>Astro server</strong> from FastAPI
-  (not only client-side JS), which fixes the "stuck on loading" problem and improves first paint.
+  صفحه‌ی <code dir="ltr">/meeting/[id]</code> داده را روی <strong>سرور Astro</strong> از FastAPI می‌گیرد
+  (نه فقط با JS سمت کلاینت)، که مشکل «گیرکردن روی در حال بارگذاری» را رفع و first paint را بهتر می‌کند.
 </p>
 
 <div class="screenshot-grid">
   <figure>
-    <img src="screenshots/home.png" alt="Home page — meeting list, filter, sample meetings, transcript form" loading="lazy" />
-    <figcaption><strong>Home</strong> — meeting archive, search/filter, synthetic meetings, ingest form</figcaption>
+    <img src="screenshots/home.png" alt="صفحه خانه — لیست جلسات، فیلتر، جلسات نمونه و فرم transcript" loading="lazy" />
+    <figcaption><strong>خانه</strong> — آرشیو جلسات، جستجو/فیلتر، جلسات مصنوعی، فرم ingest</figcaption>
   </figure>
   <figure>
-    <img src="screenshots/meeting-summary.png" alt="Meeting page — summary tab" loading="lazy" />
-    <figcaption><strong>Meeting · Summary</strong> — key points, decisions, participation stats</figcaption>
+    <img src="screenshots/meeting-summary.png" alt="صفحه جلسه — تب خلاصه" loading="lazy" />
+    <figcaption><strong>جلسه · خلاصه</strong> — نکات کلیدی، تصمیمات، آمار مشارکت</figcaption>
   </figure>
   <figure>
-    <img src="screenshots/meeting-tasks.png" alt="Meeting page — tasks and Jira tab" loading="lazy" />
-    <figcaption><strong>Meeting · Tasks</strong> — action items, preview and create Jira issues</figcaption>
+    <img src="screenshots/meeting-tasks.png" alt="صفحه جلسه — تب تسک‌ها و Jira" loading="lazy" />
+    <figcaption><strong>جلسه · تسک‌ها</strong> — action itemها، preview و ایجاد issue در Jira</figcaption>
   </figure>
   <figure>
-    <img src="screenshots/meeting-rag.png" alt="Meeting page — RAG ask tab" loading="lazy" />
-    <figcaption><strong>Meeting · Ask</strong> — RAG with natural answers and sources</figcaption>
+    <img src="screenshots/meeting-rag.png" alt="صفحه جلسه — تب پرسش RAG" loading="lazy" />
+    <figcaption><strong>جلسه · پرسش</strong> — RAG با پاسخ طبیعی و منابع</figcaption>
   </figure>
   <figure>
-    <img src="screenshots/tasks.png" alt="Tasks dashboard" loading="lazy" />
-    <figcaption><strong>Tasks</strong> — cross-meeting dashboard with an "open only" filter</figcaption>
+    <img src="screenshots/tasks.png" alt="داشبورد تسک‌ها" loading="lazy" />
+    <figcaption><strong>تسک‌ها</strong> — داشبورد cross-meeting با فیلتر «فقط باز»</figcaption>
   </figure>
   <figure>
-    <img src="screenshots/settings.png" alt="Settings page" loading="lazy" />
-    <figcaption><strong>Settings</strong> — API status, speaker&rarr;Jira mapping, .env guide</figcaption>
+    <img src="screenshots/settings.png" alt="صفحه تنظیمات" loading="lazy" />
+    <figcaption><strong>تنظیمات</strong> — وضعیت API، نگاشت گوینده&larr;Jira، راهنمای .env</figcaption>
   </figure>
 </div>
-<p class="meta">Screenshots are produced by <code>./scripts/capture-ui-screenshots.sh</code> (Playwright) — backend + frontend must be running.</p>
+<p class="meta">اسکرین‌شات‌ها با <code dir="ltr">./scripts/capture-ui-screenshots.sh</code> (Playwright) تولید می‌شوند — backend و frontend باید در حال اجرا باشند.</p>
 
-<h2 id="api">9. API Endpoints</h2>
+<h2 id="api">۹. Endpointهای API</h2>
 <table>
-  <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-  <tr><td>GET</td><td><code>/api/health</code></td><td>Service health — Google/Jira/DB status</td></tr>
-  <tr><td>GET</td><td><code>/api/meetings</code></td><td>List meetings</td></tr>
-  <tr><td>GET</td><td><code>/api/meetings/{id}</code></td><td>Get one meeting</td></tr>
-  <tr><td>DELETE</td><td><code>/api/meetings/{id}</code></td><td>Delete a meeting</td></tr>
-  <tr><td>GET</td><td><code>/api/tasks</code></td><td>Cross-meeting action items</td></tr>
-  <tr><td>GET</td><td><code>/api/meetings/synthetic</code></td><td>List bundled synthetic meetings</td></tr>
-  <tr><td>POST</td><td><code>/api/meetings/synthetic/{file_id}</code></td><td>Ingest a synthetic meeting</td></tr>
-  <tr><td>POST</td><td><code>/api/transcribe</code></td><td>Transcribe an audio file with Gemini</td></tr>
-  <tr><td>POST</td><td><code>/api/meetings</code></td><td>Ingest + <code>analysis_agent</code></td></tr>
-  <tr><td>GET</td><td><code>/api/meetings/{id}/export</code></td><td>Export a meeting summary</td></tr>
-  <tr><td>GET</td><td><code>/api/meetings/{id}/speakers</code></td><td>Speaker participation stats</td></tr>
-  <tr><td>GET</td><td><code>/api/meetings/{id}/facilitation</code></td><td>Facilitator guide — <code>facilitation_agent</code></td></tr>
-  <tr><td>POST</td><td><code>/api/meetings/{id}/ask</code></td><td>RAG — <code>rag_agent</code></td></tr>
-  <tr><td>POST</td><td><code>/api/meetings/{id}/jira/preview</code></td><td>Preview Jira issues</td></tr>
-  <tr><td>POST</td><td><code>/api/meetings/{id}/jira/create</code></td><td>Create issues in Jira</td></tr>
-  <tr><td>GET / PUT / DELETE</td><td><code>/api/settings/assignee-map</code></td><td>Speaker &rarr; Jira account mapping</td></tr>
+  <tr><th>Method</th><th>Path</th><th>توضیح</th></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/health</td><td>سلامت سرویس — وضعیت Google/Jira/DB</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings</td><td>لیست جلسات</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/{id}</td><td>دریافت یک جلسه</td></tr>
+  <tr><td dir="ltr">DELETE</td><td dir="ltr">/api/meetings/{id}</td><td>حذف جلسه</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/tasks</td><td>action itemهای cross-meeting</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/synthetic</td><td>لیست جلسات مصنوعی همراه</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/synthetic/{file_id}</td><td>ingest یک جلسه‌ی مصنوعی</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/transcribe</td><td>رونویسی فایل صوتی با Gemini</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings</td><td>ingest + <code>analysis_agent</code></td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/{id}/export</td><td>خروجی خلاصه‌ی جلسه</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/{id}/speakers</td><td>آمار مشارکت گویندگان</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/meetings/{id}/facilitation</td><td>راهنمای برگزارکننده — <code>facilitation_agent</code></td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/ask</td><td>RAG — <code>rag_agent</code></td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/preview</td><td>پیش‌نمایش issueهای Jira</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/jira/create</td><td>ایجاد issue در Jira</td></tr>
+  <tr><td dir="ltr">GET / PUT / DELETE</td><td dir="ltr">/api/settings/assignee-map</td><td>نگاشت گوینده &larr; حساب Jira</td></tr>
 </table>
 
-<h2 id="synthetic">10. Synthetic Data</h2>
+<h2 id="synthetic">۱۰. داده مصنوعی</h2>
 <table>
-  <tr><th>File</th><th>Topic</th></tr>
-  <tr><td><code>meeting-01-scrum.txt</code></td><td>Weekly stand-up</td></tr>
-  <tr><td><code>meeting-02-planning.txt</code></td><td>MVP planning</td></tr>
-  <tr><td><code>meeting-03-review.txt</code></td><td>Sprint review</td></tr>
+  <tr><th>فایل</th><th>موضوع</th></tr>
+  <tr><td dir="ltr">meeting-01-scrum.txt</td><td>استنداپ هفتگی</td></tr>
+  <tr><td dir="ltr">meeting-02-planning.txt</td><td>برنامه‌ریزی MVP</td></tr>
+  <tr><td dir="ltr">meeting-03-review.txt</td><td>بازبینی sprint</td></tr>
 </table>
-<p>Line format: <code>[14:02] Ali: spoken text</code>.</p>
+<p>قالب خط: <code dir="ltr">[14:02] علی: متن گفتار</code>.</p>
 
-<h2 id="env">11. Environment Configuration (.env)</h2>
+<h2 id="env">۱۱. تنظیمات محیط (.env)</h2>
 <pre><code>GOOGLE_API_KEY=...
 EMBEDDING_MODEL=gemini-embedding-001
 GEMINI_MODEL=google:gemini-3.5-flash
@@ -335,65 +335,65 @@ JIRA_API_TOKEN=...
 PUBLIC_BACKEND_URL=http://127.0.0.1:8000
 BACKEND_PORT=8000</code></pre>
 
-<h2 id="structure">12. Project Structure</h2>
+<h2 id="structure">۱۲. ساختار پروژه</h2>
 <pre><code>project/
-├── frontend/          # Astro SSR — Persian RTL UI
+├── frontend/          # Astro SSR — رابط فارسی RTL
 ├── backend/
-│   ├── main.py        # FastAPI app + routes
+│   ├── main.py        # اپ FastAPI + routeها
 │   ├── agents/        # analysis_agent, rag_agent, facilitation
 │   ├── services/      # sqlite, chroma, jira, embed, audio_transcribe,
 │   │                  # gemini_errors, stats, ingest, facilitation
-│   ├── models/        # Pydantic schemas
-│   └── tests/         # unit + live tests
-├── data/synthetic/    # sample meetings
-├── data/meetings.db   # SQLite — summaries and tasks
-├── data/chroma/       # ChromaDB persistence
-├── docs/              # HTML docs + PDFs + diagrams + CHANGELOG
+│   ├── models/        # schemaهای Pydantic
+│   └── tests/         # تست واحد + live
+├── data/synthetic/    # جلسات نمونه
+├── data/meetings.db   # SQLite — خلاصه و تسک‌ها
+├── data/chroma/       # پایداری ChromaDB
+├── docs/              # اسناد HTML + PDF + نمودار + CHANGELOG
 └── scripts/           # run-dev, run-backend, run-frontend, tests, export-docs</code></pre>
 
-<h2 id="run">13. Running the System</h2>
-<p>The whole stack starts with a single script (frees ports, starts both servers, cleans up on exit):</p>
+<h2 id="run">۱۳. اجرای سامانه</h2>
+<p>کل پشته با یک اسکریپت اجرا می‌شود (پورت‌ها را آزاد می‌کند، هر دو سرور را بالا می‌آورد، و هنگام خروج پاک‌سازی می‌کند):</p>
 <pre><code>chmod +x scripts/run-dev.sh
 ./scripts/run-dev.sh
-# open http://localhost:4321</code></pre>
-<p>Or run the two services separately:</p>
-<pre><code>./scripts/run-backend.sh    # FastAPI on :8000
-./scripts/run-frontend.sh   # Astro on :4321</code></pre>
+# باز کنید: http://localhost:4321</code></pre>
+<p>یا دو سرویس را جدا اجرا کنید:</p>
+<pre><code>./scripts/run-backend.sh    # FastAPI روی :8000
+./scripts/run-frontend.sh   # Astro روی :4321</code></pre>
 
-<h2 id="tests">14. Tests</h2>
+<h2 id="tests">۱۴. تست‌ها</h2>
 <table>
-  <tr><th>Type</th><th>Command</th><th>Count</th></tr>
-  <tr><td>Unit (mocked)</td><td><code>./scripts/run-tests.sh</code></td><td>150 passing (13 skip without optional/live creds)</td></tr>
-  <tr><td>Live API &amp; integration</td><td><code>./scripts/run-live-tests.sh</code></td><td>13 (real Gemini/Jira)</td></tr>
-  <tr><td>All</td><td><code>./scripts/run-all-tests.sh</code></td><td>unit + live</td></tr>
+  <tr><th>نوع</th><th>دستور</th><th>تعداد</th></tr>
+  <tr><td>واحد (mock)</td><td dir="ltr">./scripts/run-tests.sh</td><td>۱۵۰ موفق (۱۳ مورد بدون اعتبارنامه‌ی اختیاری/live رد می‌شوند)</td></tr>
+  <tr><td>live API و یکپارچگی</td><td dir="ltr">./scripts/run-live-tests.sh</td><td>۱۳ (Gemini/Jira واقعی)</td></tr>
+  <tr><td>همه</td><td dir="ltr">./scripts/run-all-tests.sh</td><td>واحد + live</td></tr>
 </table>
 <p>
-  Unit tests mock the LLM and external services so they run fast and offline. The live suite exercises the
-  real FastAPI routes against real Google/Jira credentials, with a single end-to-end Gemini flow per
-  session to avoid event-loop issues with Pydantic AI.
+  تست‌های واحد، LLM و سرویس‌های بیرونی را mock می‌کنند تا سریع و آفلاین اجرا شوند. مجموعه‌ی live، routeهای
+  واقعی FastAPI را در برابر اعتبارنامه‌ی واقعی Google/Jira اجرا می‌کند، با یک جریان end-to-end تکیِ Gemini
+  در هر session تا از مشکلات event-loop در Pydantic AI جلوگیری شود.
 </p>
 
-<h2 id="errors">15. Error Handling</h2>
+<h2 id="errors">۱۵. مدیریت خطا</h2>
 <table>
-  <tr><th>Error</th><th>Behavior</th></tr>
-  <tr><td>Gemini timeout</td><td>One retry + a Persian message</td></tr>
-  <tr><td>Transcript with no speaker</td><td>Labelled <code>[Unknown]</code></td></tr>
-  <tr><td>Jira 401</td><td>Guidance to check <code>.env</code></td></tr>
-  <tr><td>Invalid / oversized audio</td><td>HTTP 400 (Persian) — format or <code>MAX_AUDIO_BYTES</code></td></tr>
-  <tr><td>Gemini billing (403 dunning)</td><td>Friendly Persian billing message for transcription and analysis</td></tr>
-  <tr><td>RAG with no match</td><td>"Not found in this meeting"</td></tr>
+  <tr><th>خطا</th><th>رفتار</th></tr>
+  <tr><td>timeout در Gemini</td><td>یک‌بار retry + پیام فارسی</td></tr>
+  <tr><td>transcript بدون speaker</td><td>برچسب <code dir="ltr">[ناشناس]</code></td></tr>
+  <tr><td>Jira 401</td><td>راهنمای بررسی <code>.env</code></td></tr>
+  <tr><td>فایل صوتی نامعتبر / بزرگ</td><td>HTTP 400 (فارسی) — فرمت یا <code>MAX_AUDIO_BYTES</code></td></tr>
+  <tr><td>Gemini billing (403 dunning)</td><td>پیام فارسی راهنمای billing برای رونویسی و تحلیل</td></tr>
+  <tr><td>RAG بدون match</td><td>«در این جلسه یافت نشد»</td></tr>
 </table>
 <p>
-  A dedicated <code>gemini_errors</code> service maps provider exceptions (<code>ModelHTTPError</code> and
-  httpx errors) to user-friendly Persian <code>HTTPException</code>s, so a billing hold or an invalid key
-  never surfaces as a raw stack trace.
+  یک سرویس اختصاصی <code>gemini_errors</code>، استثناهای ارائه‌دهنده (<code>ModelHTTPError</code> و خطاهای
+  httpx) را به <code>HTTPException</code>های فارسی و کاربرپسند نگاشت می‌کند، تا یک hold در billing یا کلید
+  نامعتبر هرگز به‌صورت یک stack trace خام ظاهر نشود.
 </p>
 
 <div class="future">
-  <strong>Next sprints:</strong> see <a href="03-roadmap-and-future-work.html">Document 3</a> — multi-meeting
-  RAG + full-text archive (Sprint 2), Jira assignee mapping + OAuth (Sprint 3), auth/workspace + calendar
-  metadata (Sprint 4), PostgreSQL + queue + deployment (Sprint 5), and multi-agent capabilities (Sprint 6+).
-  Live streaming STT is intentionally <em>not</em> on the roadmap — Gemini transcription covers the MVP need.
+  <strong>اسپرینت‌های بعدی:</strong> به <a href="03-roadmap-and-future-work.html">سند ۳</a> مراجعه کنید —
+  RAG چندجلسه + آرشیو full-text (Sprint 2)، نگاشت assignee + OAuth در Jira (Sprint 3)، auth/workspace +
+  متادیتای تقویم (Sprint 4)، PostgreSQL + queue + استقرار (Sprint 5)، و قابلیت‌های چندعامله (Sprint 6+).
+  STT جریانی زنده عمداً در نقشه‌ی راه <em>نیست</em> — رونویسی Gemini نیاز MVP را پوشش می‌دهد.
 </div>
 
 </body>

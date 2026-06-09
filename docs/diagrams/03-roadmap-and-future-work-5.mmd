@@ -4,7 +4,7 @@ flowchart TB
     SA["sentiment_agent<br/>Gemini structured output"]
     OUT["SpeakerSentimentProfile"]
     TR --> CH --> SA --> OUT
-    subgraph metrics ["Metrics"]
+    subgraph metrics ["متریک‌ها"]
         M1["polarity: -1..+1"]
         M2["engagement: low/med/high"]
         M3["concern_flags[]"]

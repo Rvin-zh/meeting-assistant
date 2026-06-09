@@ -1,17 +1,17 @@
 flowchart TB
-    subgraph input ["New inputs"]
-        T["Meeting transcript"]
-        D["Documents: SOW · contract · PDF"]
+    subgraph input ["ورودی‌های جدید"]
+        T["Transcript جلسه"]
+        D["اسناد: SOW · قرارداد · PDF"]
     end
-    subgraph agents ["Proposed agents"]
-        F["facilitation_agent<br/>facilitator guide"]
-        A["alignment_agent<br/>scope alignment"]
-        S["sentiment_agent<br/>speaker tone"]
+    subgraph agents ["عامل‌های پیشنهادی"]
+        F["facilitation_agent<br/>راهنمای برگزارکننده"]
+        A["alignment_agent<br/>هم‌راستایی با scope"]
+        S["sentiment_agent<br/>تحلیل لحن گویندگان"]
     end
-    subgraph output ["Organizational output"]
-        G["Better-meeting checklist"]
-        R["In-scope / out-of-scope report"]
-        M["Sentiment map · risk flags"]
+    subgraph output ["خروجی برای سازمان"]
+        G["چک‌لیست جلسه بهتر"]
+        R["گزارش in-scope / out-of-scope"]
+        M["نقشه احساسات · هشدار ریسک"]
     end
     T --> F & S
     T --> A
