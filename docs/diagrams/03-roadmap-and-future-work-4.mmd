@@ -1,0 +1,18 @@
+flowchart LR
+    subgraph docs ["Document store"]
+        UP["Upload PDF/DOCX"]
+        PAR["parse + chunk"]
+        EMB["embed → Chroma<br/>collection: org_docs"]
+    end
+    subgraph meeting ["Meeting"]
+        DEC["decisions + tasks<br/>from analysis_agent"]
+    end
+    subgraph align ["alignment_agent"]
+        RET["retrieve relevant clauses"]
+        CMP["semantic comparison"]
+        REP["AlignmentReport"]
+    end
+    UP --> PAR --> EMB
+    DEC --> RET
+    EMB --> RET
+    RET --> CMP --> REP

@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant U as User
+    participant UI as Astro (RTL)
+    participant API as FastAPI
+    participant G as Gemini
+    participant AA as analysis_agent
+    participant RA as rag_agent
+    participant C as ChromaDB
+    participant J as Jira KAN
+
+    U->>UI: transcript / audio / sample meeting
+    opt audio file or recording
+        UI->>API: POST /api/transcribe
+        API->>G: Gemini audio → text
+        API-->>UI: transcript
+    end
+    UI->>API: POST /api/meetings
+    API->>API: parse + chunk + embed
+    API->>C: index chunks
+    API->>AA: run(transcript)
+    AA-->>UI: summary + tasks (SSR)
+    U->>UI: RAG question
+    UI->>API: POST /ask
+    API->>C: query by meeting_id
+    API->>RA: context + question
+    RA-->>UI: natural answer + footnote
+    U->>UI: confirm task
+    UI->>API: POST /jira/create
+    API->>J: new issue

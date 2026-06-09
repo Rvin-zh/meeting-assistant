@@ -4,6 +4,7 @@
 
 | تاریخ | تغییر |
 |--------|--------|
+| ۱۴۰۵/۰۳/۱۹ | **بازساختاری اسناد:** ۵ سند فارسی → ۳ سند انگلیسی گسترش‌یافته (overview / implementation / roadmap+future) برای ارائه دانشگاهی؛ ادغام نقشه اسپرینت و قابلیت‌های پیشرفته |
 | ۱۴۰۵/۰۳/۱۶ | **تست facilitation:** schema، agent prompt، API، live Gemini — `test_facilitation.py` |
 | ۱۴۰۵/۰۳/۱۶ | **نمونه transcript:** سه جلسه مصنوعی طولانی‌تر و پیچیده‌تر برای scrum، planning و review/retro |
 | ۱۴۰۵/۰۳/۰۶ | **Spec آینده:** راهنمای برگزارکننده، هم‌راستایی SOW/قرارداد، sentiment — `قابلیت‌های-پیشرفته-آینده.html` + نمودار |
@@ -28,9 +29,9 @@
 
 | سند | مخاطب |
 |-----|--------|
-| [پروژه-اصلی.html](پروژه-اصلی.html) | چشم‌انداز و معماری کل |
-| [پیاده-سازی.html](پیاده-سازی.html) | جزئیات فنی MVP |
-| [شرح-پروژه-دستیار-جلسه.html](شرح-پروژه-دستیار-جلسه.html) | دوره AI-native، RAG، تکلیف |
+| [01-project-overview.html](01-project-overview.html) | چشم‌انداز، معماری، چارچوب AI-native |
+| [02-implementation.html](02-implementation.html) | جزئیات فنی MVP |
+| [03-roadmap-and-future-work.html](03-roadmap-and-future-work.html) | اسپرینت‌ها، قابلیت‌های پیشرفته، MLOps |
 | [superpowers/specs/2026-05-26-meeting-assistant-design.md](superpowers/specs/2026-05-26-meeting-assistant-design.md) | Spec مهندسی |
 
 ## قانون نگهداری

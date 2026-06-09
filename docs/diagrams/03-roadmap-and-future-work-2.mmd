@@ -1,0 +1,21 @@
+flowchart TB
+    subgraph input ["New inputs"]
+        T["Meeting transcript"]
+        D["Documents: SOW · contract · PDF"]
+    end
+    subgraph agents ["Proposed agents"]
+        F["facilitation_agent<br/>facilitator guide"]
+        A["alignment_agent<br/>scope alignment"]
+        S["sentiment_agent<br/>speaker tone"]
+    end
+    subgraph output ["Organizational output"]
+        G["Better-meeting checklist"]
+        R["In-scope / out-of-scope report"]
+        M["Sentiment map · risk flags"]
+    end
+    T --> F & S
+    T --> A
+    D --> A
+    F --> G
+    A --> R
+    S --> M

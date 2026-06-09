@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant O as Facilitator
+    participant UI as Astro
+    participant API as FastAPI
+    participant FA as facilitation_agent
+    participant ST as participation stats
+
+    O->>UI: meeting ends · ingest
+    API->>ST: speaker stats · duration · #decisions/#tasks
+    API->>FA: transcript + stats + meeting type
+    FA-->>UI: FacilitationReport
+    UI-->>O: guidance + next-meeting checklist

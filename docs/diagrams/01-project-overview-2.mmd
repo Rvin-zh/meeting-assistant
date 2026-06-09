@@ -1,0 +1,10 @@
+flowchart LR
+    T["Transcript"] --> C["Chunk<br/>3–5 turns"]
+    C --> E["gemini-embedding-001"]
+    E --> V["ChromaDB<br/>meeting_chunks"]
+    Q["User question"] --> ST{"small talk?"}
+    ST -->|hello / greeting| CH["chitchat — no search"]
+    ST -->|no| S["Chroma query top-4"]
+    S --> CTX["Internal context"]
+    CTX --> AG["rag_agent"]
+    AG --> A["Natural answer + footnote"]

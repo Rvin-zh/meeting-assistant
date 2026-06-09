@@ -23,14 +23,19 @@ chmod +x scripts/run-tests.sh
 
 ## اجرا
 
-ترمینال ۱ — backend:
+یک ترمینال — backend + frontend:
+
+```bash
+chmod +x scripts/run-dev.sh
+./scripts/run-dev.sh
+```
+
+یا دو ترمینال جدا:
 
 ```bash
 chmod +x scripts/run-backend.sh
 ./scripts/run-backend.sh
 ```
-
-ترمینال ۲ — frontend:
 
 ```bash
 chmod +x scripts/run-frontend.sh
@@ -39,13 +44,18 @@ chmod +x scripts/run-frontend.sh
 
 باز کنید: http://localhost:4321
 
-## اسناد
+## اسناد (English — graduation set)
+
+سه سند اصلی پروژه به انگلیسی (مناسب ارائه دانشگاهی) در `docs/`:
+
+- `docs/01-project-overview.html` — Project Overview & Vision (problem, product, architecture, AI-native framing)
+- `docs/02-implementation.html` — Technical Implementation (data flow, RAG, agents, API, UI, tests)
+- `docs/03-roadmap-and-future-work.html` — Roadmap & Future Work (Sprints 2–6+, facilitator guide, SOW alignment, sentiment, MLOps)
+
+سایر منابع:
 
 - `docs/README.md` — فهرست مستندات
 - `docs/CHANGELOG.md` — **تاریخچه تغییرات** (با هر feature به‌روز شود)
-- `docs/پروژه-اصلی.html` · `docs/پیاده-سازی.html` · `docs/شرح-پروژه-دستیار-جلسه.html`
-- **Planned (Sprint 6+):** `docs/قابلیت‌های-پیشرفته-آینده.html` — facilitator guide, SOW alignment, sentiment
 - Spec: `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md`
-- Roadmap: `docs/نقشه-اسپرینت‌ها.html` (Sprints 2–6+)
 - **Voice:** آپلود/ضبط صوت → Gemini رونویسی → همان pipeline تحلیل (`POST /api/transcribe`)
-- PDF export: `./scripts/export-docs.sh` → `docs/pdf/`
+- PDF export: `./scripts/export-docs.sh` → `docs/pdf/` (سه PDF متناظر سه سند بالا)

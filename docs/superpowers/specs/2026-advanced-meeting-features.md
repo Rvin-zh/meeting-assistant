@@ -2,7 +2,7 @@
 
 **Status:** Facilitation guide **implemented** · Document alignment & sentiment planned (Sprint 6+)  
 **Updated:** 2026-06-04  
-**Persian HTML:** [قابلیت‌های-پیشرفته-آینده.html](../../قابلیت‌های-پیشرفته-آینده.html)
+**HTML doc:** [03-roadmap-and-future-work.html](../../03-roadmap-and-future-work.html)
 
 ---
 

@@ -1,0 +1,15 @@
+flowchart TB
+    subgraph pages ["Pages — RTL"]
+        home["/ home"]
+        meeting["/meeting/id"]
+        tasks["/tasks"]
+        settings["/settings"]
+    end
+    subgraph tabs ["Meeting tabs"]
+        tab1["Summary &amp; decisions"]
+        tab2["Tasks + Jira"]
+        tab3["Ask the meeting"]
+        tab4["Facilitator guide"]
+    end
+    home --> meeting
+    meeting --> tabs

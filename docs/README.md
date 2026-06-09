@@ -2,13 +2,18 @@
 
 ## فهرست
 
+سه سند اصلی به **انگلیسی** (مناسب ارائه/فارغ‌التحصیلی) — هر کدام یک PDF متناظر در `pdf/`:
+
 | فایل | محتوا |
 |------|--------|
-| [پروژه-اصلی.html](پروژه-اصلی.html) | چشم‌انداز محصول، معماری، sprintها |
-| [پیاده-سازی.html](پیاده-سازی.html) | پیاده‌سازی فنی: API، ChromaDB، RAG، Jira، UI |
-| [شرح-پروژه-دستیار-جلسه.html](شرح-پروژه-دستیار-جلسه.html) | شرح دوره، RAG، MLOps آینده |
-| [قابلیت‌های-پیشرفته-آینده.html](قابلیت‌های-پیشرفته-آینده.html) | **Sprint 6+** — راهنمای برگزارکننده · SOW/قرارداد · sentiment |
-| [نقشه-اسپرینت‌ها.html](نقشه-اسپرینت‌ها.html) | **اسپرینت ۲–۶+** — ایده‌ها و اولویت |
+| [01-project-overview.html](01-project-overview.html) | **Project Overview & Vision** — مسئله، محصول، معماری، چارچوب AI-native، معیار موفقیت |
+| [02-implementation.html](02-implementation.html) | **Technical Implementation** — جریان داده، RAG، agents، SQLite/Chroma، API، UI، تست‌ها، مدیریت خطا |
+| [03-roadmap-and-future-work.html](03-roadmap-and-future-work.html) | **Roadmap & Future Work** — اسپرینت ۲–۶+، راهنمای برگزارکننده، SOW/قرارداد، sentiment، MLOps، ایده‌های پژوهشی |
+
+منابع تکمیلی:
+
+| فایل | محتوا |
+|------|--------|
 | [CHANGELOG.md](CHANGELOG.md) | **تاریخچه تغییرات** — با هر feature به‌روز شود |
 | [screenshots/](screenshots/) | **اسکرین‌شات UI/UX** — خانه، جلسه، تسک‌ها، تنظیمات |
 | [superpowers/specs/2026-05-26-meeting-assistant-design.md](superpowers/specs/2026-05-26-meeting-assistant-design.md) | Spec طراحی |
