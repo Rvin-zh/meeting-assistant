@@ -44,13 +44,13 @@ chmod +x scripts/run-frontend.sh
 
 باز کنید: http://localhost:4321
 
-## اسناد (English — graduation set)
+## اسناد (سه سند اصلی فارسی)
 
-سه سند اصلی پروژه به انگلیسی (مناسب ارائه دانشگاهی) در `docs/`:
+سه سند اصلی پروژه به فارسی (مناسب ارائه دانشگاهی) در `docs/` — هر کدام یک PDF متناظر در `docs/pdf/`:
 
-- `docs/01-project-overview.html` — Project Overview & Vision (problem, product, architecture, AI-native framing)
-- `docs/02-implementation.html` — Technical Implementation (data flow, RAG, agents, API, UI, tests)
-- `docs/03-roadmap-and-future-work.html` — Roadmap & Future Work (Sprints 2–6+, facilitator guide, SOW alignment, sentiment, MLOps)
+- `docs/01-project-overview.html` — **شرح پروژه و چشم‌انداز** (مسئله، محصول، معماری، چارچوب AI-native، معیار موفقیت)
+- `docs/02-implementation.html` — **پیاده‌سازی فنی** (جریان داده، RAG، عامل‌ها، API، UI، تست‌ها، مدیریت خطا)
+- `docs/03-roadmap-and-future-work.html` — **نقشه راه و کارهای آینده** (اسپرینت ۲–۶+، راهنمای برگزارکننده، هم‌راستایی SOW، sentiment، MLOps، ایده‌های پژوهشی)
 
 سایر منابع:
 

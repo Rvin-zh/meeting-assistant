@@ -1,12 +1,12 @@
 sequenceDiagram
-    participant O as Facilitator
+    participant O as برگزارکننده
     participant UI as Astro
     participant API as FastAPI
     participant FA as facilitation_agent
-    participant ST as participation stats
+    participant ST as آمار مشارکت
 
-    O->>UI: meeting ends · ingest
-    API->>ST: speaker stats · duration · #decisions/#tasks
-    API->>FA: transcript + stats + meeting type
+    O->>UI: پایان جلسه · ingest
+    API->>ST: speaker stats · مدت · تعداد تصمیم/تسک
+    API->>FA: transcript + stats + نوع جلسه
     FA-->>UI: FacilitationReport
-    UI-->>O: guidance + next-meeting checklist
+    UI-->>O: راهنمای فارسی + چک‌لیست جلسه بعد

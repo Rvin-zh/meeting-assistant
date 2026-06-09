@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meeting Assistant — Roadmap &amp; Future Work</title>
+  <title>دستیار جلسه — نقشه راه و کارهای آینده</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
   <style>
     :root { --text: #1a1a1a; --muted: #555; --border: #ddd; --bg: #fafafa; --accent: #7c3aed; }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.7; color: var(--text); max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; background: #fff; }
-    h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; line-height: 1.25; }
-    h2 { font-size: 1.45rem; margin-top: 2.75rem; color: #5b21b6; border-left: 4px solid var(--accent); padding-left: 0.6rem; }
-    h3 { font-size: 1.12rem; margin-top: 1.75rem; color: #1f2937; }
-    p, li { font-size: 1rem; }
+    body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.95; color: var(--text); max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; background: #fff; }
+    h1 { font-size: 1.95rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.6rem; line-height: 1.5; }
+    h2 { font-size: 1.4rem; margin-top: 2.75rem; color: #5b21b6; border-right: 4px solid var(--accent); padding-right: 0.6rem; }
+    h3 { font-size: 1.13rem; margin-top: 1.75rem; color: #1f2937; }
+    h4 { font-size: 1.02rem; margin-top: 1.25rem; color: #374151; }
+    p, li { font-size: 1.02rem; }
     a { color: #2563eb; text-decoration: none; }
     a:hover { text-decoration: underline; }
-    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
-    th, td { border: 1px solid var(--border); padding: 0.55rem 0.8rem; text-align: left; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.96rem; }
+    th, td { border: 1px solid var(--border); padding: 0.55rem 0.8rem; text-align: right; vertical-align: top; }
     th { background: var(--bg); }
+    code, pre, .ltr, .mermaid-wrap { direction: ltr; text-align: left; unicode-bidi: embed; }
     code { background: #f3e8ff; padding: 0.12rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
     pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
     .mermaid-wrap { margin: 1.5rem 0; padding: 1rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
-    .note { background: #f5f3ff; border-left: 4px solid var(--accent); padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
-    .warn { background: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
-    .guide { background: #ecfdf5; border-left: 4px solid #059669; padding: 1rem 1.25rem; margin: 1.2rem 0; border-radius: 0 8px 8px 0; }
-    .out { background: #fef2f2; border-left: 4px solid #dc2626; padding: 0.75rem 1rem; margin: 1.2rem 0; font-size: 0.92rem; border-radius: 0 8px 8px 0; }
+    .note { background: #f5f3ff; border-right: 4px solid var(--accent); padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
+    .warn { background: #fef2f2; border-right: 4px solid #dc2626; padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
+    .guide { background: #ecfdf5; border-right: 4px solid #059669; padding: 1rem 1.25rem; margin: 1.2rem 0; border-radius: 8px 0 0 8px; }
+    .out { background: #fef2f2; border-right: 4px solid #dc2626; padding: 0.75rem 1rem; margin: 1.2rem 0; font-size: 0.92rem; border-radius: 8px 0 0 8px; }
     .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
     nav.toc { background: var(--bg); padding: 1rem 1.4rem; border-radius: 8px; margin: 1.5rem 0 2.5rem; border: 1px solid var(--border); }
-    nav.toc ol { margin: 0.3rem 0; padding-left: 1.4rem; }
+    nav.toc ol { margin: 0.3rem 0; padding-right: 1.4rem; }
     nav.toc a { color: #2563eb; }
-    ul.checklist { list-style: none; padding-left: 0.2rem; }
+    ul.checklist { list-style: none; padding-right: 0.2rem; }
     ul.checklist li::before { content: "\2610  "; color: var(--accent); font-weight: bold; }
   </style>
   <script type="module">
@@ -39,143 +42,143 @@
 </head>
 <body>
 
-<h1>Meeting Assistant<br>Roadmap &amp; Future Work</h1>
+<h1>دستیار جلسه<br>نقشه راه و کارهای آینده</h1>
 <p class="meta">
-  Document 3 of 3 · Product roadmap, advanced capabilities, and research directions ·
-  <a href="01-project-overview.html">Overview</a> ·
-  <a href="02-implementation.html">Implementation</a> ·
-  <a href="CHANGELOG.md">Changelog</a>
+  سند ۳ از ۳ · نقشه راه محصول، قابلیت‌های پیشرفته و مسیرهای پژوهشی ·
+  <a href="01-project-overview.html">شرح پروژه</a> ·
+  <a href="02-implementation.html">پیاده‌سازی</a> ·
+  <a href="CHANGELOG.md">CHANGELOG</a>
 </p>
 
 <p>
-  This document consolidates everything that comes <em>after</em> the MVP: the sprint-by-sprint product
-  roadmap, the three advanced differentiating capabilities (facilitator guide, document alignment,
-  sentiment), the operational quality loop (MLOps), and a set of longer-horizon research ideas. It is the
-  "future ideas" companion to <a href="01-project-overview.html">Document 1</a> (vision) and
-  <a href="02-implementation.html">Document 2</a> (the system as built today).
+  این سند هر آنچه را که <em>پس از</em> MVP می‌آید یک‌جا گرد می‌آورد: نقشه‌ی راه محصول به‌تفکیک اسپرینت،
+  سه قابلیت پیشرفته‌ی متمایزکننده (راهنمای برگزارکننده، هم‌راستایی اسناد، تحلیل احساسات)، چرخه‌ی کیفیت
+  عملیاتی (MLOps)، و مجموعه‌ای از ایده‌های افق‌بلندتر پژوهشی. این، همراهِ «ایده‌های آینده»ی
+  <a href="01-project-overview.html">سند ۱</a> (چشم‌انداز) و <a href="02-implementation.html">سند ۲</a>
+  (سامانه‌ی فعلی) است.
 </p>
 
 <div class="note">
-  <strong>Status legend.</strong>
-  Sprint 1 (the MVP) is complete. Within the advanced capabilities, the <strong>facilitator guide</strong>
-  is already implemented (<code>GET /api/meetings/{id}/facilitation</code>); document alignment and
-  sentiment analysis are designed but not yet built.
+  <strong>راهنمای وضعیت.</strong> اسپرینت ۱ (همان MVP) تکمیل شده است. در میان قابلیت‌های پیشرفته،
+  <strong>راهنمای برگزارکننده</strong> هم‌اکنون پیاده‌سازی شده
+  (<code dir="ltr">GET /api/meetings/{id}/facilitation</code>)؛ هم‌راستایی اسناد و تحلیل احساسات طراحی
+  شده‌اند اما هنوز ساخته نشده‌اند.
 </div>
 
 <div class="out">
-  <strong>Permanently out of scope:</strong> live streaming speech-to-text during a meeting and
-  professional speaker diarization. Single-shot Gemini transcription of uploaded/recorded audio covers the
-  product need without a separate STT pipeline.
+  <strong>برای همیشه خارج از محدوده:</strong> رونویسی زنده و جریانی حین جلسه و diarization حرفه‌ای
+  گویندگان. رونویسی تک‌مرحله‌ای Gemini از صوت آپلود/ضبط‌شده، نیاز محصول را بدون یک خط لوله‌ی جدای STT
+  پوشش می‌دهد.
 </div>
 
 <nav class="toc">
-  <strong>Contents</strong>
+  <strong>فهرست</strong>
   <ol>
-    <li><a href="#overview">Roadmap at a Glance</a></li>
-    <li><a href="#s2">Sprint 2 — Organizational Archive &amp; Search</a></li>
-    <li><a href="#s3">Sprint 3 — Jira &amp; Operational Workflow</a></li>
-    <li><a href="#s4">Sprint 4 — Users, Workspaces &amp; Calendar</a></li>
-    <li><a href="#s5">Sprint 5 — Scale, Quality &amp; Deployment</a></li>
-    <li><a href="#s6">Sprint 6+ — Intelligent Organizational Product</a></li>
-    <li><a href="#adv">Advanced Capabilities (Differentiators)</a>
+    <li><a href="#overview">۱. نقشه راه در یک نگاه</a></li>
+    <li><a href="#s2">۲. اسپرینت ۲ — آرشیو و جستجوی سازمانی</a></li>
+    <li><a href="#s3">۳. اسپرینت ۳ — Jira و گردش کار عملیاتی</a></li>
+    <li><a href="#s4">۴. اسپرینت ۴ — کاربران، فضای کار و تقویم</a></li>
+    <li><a href="#s5">۵. اسپرینت ۵ — مقیاس، کیفیت و استقرار</a></li>
+    <li><a href="#s6">۶. اسپرینت ۶+ — محصول هوشمند سازمانی</a></li>
+    <li><a href="#adv">۷. قابلیت‌های پیشرفته (متمایزکننده‌ها)</a>
       <ol>
-        <li><a href="#adv-fac">Facilitator Guide</a></li>
-        <li><a href="#adv-align">SOW / Contract Alignment</a></li>
-        <li><a href="#adv-sent">Sentiment Analysis</a></li>
+        <li><a href="#adv-fac">راهنمای برگزارکننده</a></li>
+        <li><a href="#adv-align">هم‌راستایی SOW / قرارداد</a></li>
+        <li><a href="#adv-sent">تحلیل احساسات</a></li>
       </ol>
     </li>
-    <li><a href="#mlops">MLOps &amp; the Quality Loop</a></li>
-    <li><a href="#priorities">Prioritization</a></li>
-    <li><a href="#deps">Technical Dependencies</a></li>
-    <li><a href="#research">Longer-Horizon Research Ideas</a></li>
+    <li><a href="#mlops">۸. MLOps و چرخه‌ی کیفیت</a></li>
+    <li><a href="#priorities">۹. اولویت‌بندی</a></li>
+    <li><a href="#deps">۱۰. وابستگی‌های فنی</a></li>
+    <li><a href="#research">۱۱. ایده‌های افق‌بلندتر پژوهشی</a></li>
   </ol>
 </nav>
 
-<h2 id="overview">1. Roadmap at a Glance</h2>
+<h2 id="overview">۱. نقشه راه در یک نگاه</h2>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart TB
-    S1["Sprint 1 ✅<br/>MVP demo"]
-    S2["Sprint 2<br/>Archive &amp; multi-meeting RAG"]
-    S3["Sprint 3<br/>Smart Jira &amp; integrations"]
-    S4["Sprint 4<br/>Users &amp; organizations"]
-    S5["Sprint 5<br/>Scale &amp; deployment"]
-    S6["Sprint 6+<br/>Multi-agent intelligence"]
+    S1["Sprint 1 ✅<br/>دموی MVP"]
+    S2["Sprint 2<br/>آرشیو و RAG چندجلسه"]
+    S3["Sprint 3<br/>Jira هوشمند و یکپارچه‌سازی"]
+    S4["Sprint 4<br/>کاربران و سازمان"]
+    S5["Sprint 5<br/>مقیاس و استقرار"]
+    S6["Sprint 6+<br/>هوش چندعامله"]
     S1 --> S2 --> S3 --> S4 --> S5 --> S6
 </pre>
 </div>
 <p>
-  The arc of the roadmap is a deliberate progression: from a single meeting (MVP) to an organizational
-  memory (Sprint 2), to real operational workflow (Sprint 3), to a true multi-tenant product (Sprints 4–5),
-  and finally to differentiated multi-agent intelligence (Sprint 6+).
+  قوس نقشه‌ی راه یک پیشروی عمدی است: از یک جلسه (MVP) به یک حافظه‌ی سازمانی از جلسات (اسپرینت ۲)، به
+  گردش‌کار عملیاتی واقعی (اسپرینت ۳)، به یک محصول واقعاً چندمستأجره (اسپرینت‌های ۴ و ۵)، و سرانجام به
+  هوش چندعامله‌ی متمایز (اسپرینت ۶+).
 </p>
 
-<h2 id="s2">2. Sprint 2 — Organizational Archive &amp; Search</h2>
-<p><strong>Goal:</strong> move from "one meeting" to "an organizational memory of meetings."</p>
+<h2 id="s2">۲. اسپرینت ۲ — آرشیو و جستجوی سازمانی</h2>
+<p><strong>هدف:</strong> از «یک جلسه» به «حافظه‌ی سازمانی جلسات» برسیم.</p>
 <table>
-  <tr><th>Capability</th><th>Description</th><th>Proposed implementation</th></tr>
-  <tr><td>Multi-meeting RAG</td><td>Ask across many meetings, filtered by date, project, or participant.</td><td>Chroma metadata <code>org_id</code>, <code>project</code>, <code>date</code>; filter at query time.</td></tr>
-  <tr><td>Archive page</td><td>List meetings with full-text search over title/summary.</td><td>SQLite FTS5 on <code>title</code>, <code>summary</code>.</td></tr>
-  <tr><td>Tags &amp; projects</td><td>Categorize meetings (stand-up, planning, review).</td><td><code>tags</code>, <code>project_key</code> columns in SQLite.</td></tr>
-  <tr><td>Summary export</td><td>Export to Markdown / PDF to share with managers.</td><td>Astro template or WeasyPrint from the same <code>MeetingAnalysis</code>.</td></tr>
-  <tr><td>Meeting comparison</td><td>"Last sprint's decisions vs. now" — an agent over multiple meeting ids.</td><td><code>compare_agent</code> + top-k from each meeting.</td></tr>
+  <tr><th>قابلیت</th><th>توضیح</th><th>پیاده‌سازی پیشنهادی</th></tr>
+  <tr><td>RAG چندجلسه‌ای</td><td>پرسش درباره‌ی چند جلسه با فیلتر تاریخ، پروژه، شرکت‌کننده.</td><td>metadata Chroma: <code>org_id</code>, <code>project</code>, <code>date</code>؛ فیلتر در query.</td></tr>
+  <tr><td>صفحه آرشیو</td><td>لیست جلسات با جستجوی متنی روی عنوان/خلاصه.</td><td>SQLite FTS5 روی <code>title</code>, <code>summary</code>.</td></tr>
+  <tr><td>برچسب و پروژه</td><td>دسته‌بندی جلسات (standup، planning، review).</td><td>ستون‌های <code>tags</code>, <code>project_key</code> در SQLite.</td></tr>
+  <tr><td>خروجی خلاصه</td><td>Export به Markdown / PDF برای اشتراک با مدیر.</td><td>قالب Astro یا WeasyPrint از همان <code>MeetingAnalysis</code>.</td></tr>
+  <tr><td>مقایسه جلسات</td><td>«تصمیمات sprint قبل در برابر الان» — یک عامل روی چند meeting_id.</td><td><code>compare_agent</code> + top-k از هر جلسه.</td></tr>
 </table>
-<h3>Acceptance criteria</h3>
+<h3>معیار پذیرش</h3>
 <ul>
-  <li>Three meetings ingested; one cross-meeting question cited from ≥ 2 meetings.</li>
-  <li>Archive search under 500 ms (up to ~100 meetings).</li>
-  <li>One meeting's summary exported with no RTL rendering errors.</li>
+  <li>سه جلسه ingest شده؛ یک پرسش cross-meeting با citation از حداقل دو جلسه.</li>
+  <li>جستجوی آرشیو زیر ۵۰۰ms (تا حدود ۱۰۰ جلسه).</li>
+  <li>Export خلاصه‌ی یک جلسه بدون خطای RTL.</li>
 </ul>
 
-<h2 id="s3">3. Sprint 3 — Jira &amp; Operational Workflow</h2>
-<p><strong>Goal:</strong> tasks actually reach the right people in Jira, not anonymous issues.</p>
+<h2 id="s3">۳. اسپرینت ۳ — Jira و گردش کار عملیاتی</h2>
+<p><strong>هدف:</strong> تسک‌ها واقعاً به افراد درست در Jira برسند، نه issueهای ناشناس.</p>
 <table>
-  <tr><th>Capability</th><th>Description</th><th>Technical</th></tr>
-  <tr><td>Assignee mapping</td><td>"Sara" in the transcript &rarr; a Jira <code>accountId</code>.</td><td><code>speaker_jira_map</code> table; settings UI (already scaffolded).</td></tr>
-  <tr><td><code>jira_agent</code></td><td>Preview, de-duplicate, suggest epic/link.</td><td>Pydantic-AI tools: <code>search_existing_issues</code>, <code>preview_create</code>.</td></tr>
-  <tr><td>Jira OAuth</td><td>Replace the personal API token — team-friendly.</td><td>Atlassian OAuth 2.0; encrypted refresh token storage.</td></tr>
-  <tr><td>Edit before send</td><td>Edit tasks in the UI, then bulk create.</td><td>Temporary state; POST only after confirmation.</td></tr>
-  <tr><td>Sync status</td><td>Show the issue key and Jira link on the meeting page.</td><td><code>jira_keys_json</code> per task.</td></tr>
-  <tr><td>Issue templates</td><td>Project custom fields (story points, component).</td><td>Map from <code>JIRA_PROJECT_KEY</code> + a YAML config.</td></tr>
+  <tr><th>قابلیت</th><th>توضیح</th><th>فنی</th></tr>
+  <tr><td>نگاشت assignee</td><td>«سارا» در transcript &larr; یک <code>accountId</code> در Jira.</td><td>جدول <code>speaker_jira_map</code>؛ UI تنظیمات (آماده شده).</td></tr>
+  <tr><td><code>jira_agent</code></td><td>پیش‌نمایش، حذف تکراری، پیشنهاد epic/link.</td><td>ابزارهای Pydantic AI: <code>search_existing_issues</code>, <code>preview_create</code>.</td></tr>
+  <tr><td>OAuth در Jira</td><td>جایگزین token شخصی — مناسب تیم.</td><td>Atlassian OAuth 2.0؛ ذخیره‌ی refresh token رمزنگاری‌شده.</td></tr>
+  <tr><td>ویرایش قبل از ارسال</td><td>کاربر تسک‌ها را در UI ویرایش کند، بعد bulk create.</td><td>state موقت؛ POST فقط پس از تأیید.</td></tr>
+  <tr><td>وضعیت همگام</td><td>نمایش issue key و لینک Jira در صفحه‌ی جلسه.</td><td><code>jira_keys_json</code> برای هر تسک.</td></tr>
+  <tr><td>قالب issue</td><td>فیلدهای سفارشی پروژه (story points، component).</td><td>map از <code>JIRA_PROJECT_KEY</code> + یک config YAML.</td></tr>
 </table>
 
-<h2 id="s4">4. Sprint 4 — Users, Workspaces &amp; Calendar</h2>
-<p><strong>Goal:</strong> real multi-user use and connection to everyday tools.</p>
+<h2 id="s4">۴. اسپرینت ۴ — کاربران، فضای کار و تقویم</h2>
+<p><strong>هدف:</strong> چندکاربره‌ی واقعی و اتصال به ابزارهای روزمره.</p>
 <table>
-  <tr><th>Capability</th><th>Description</th><th>Technical</th></tr>
-  <tr><td>Authentication</td><td>Email/password login or organizational SSO.</td><td>JWT sessions, or OIDC (Keycloak / Google Workspace).</td></tr>
-  <tr><td>Workspaces</td><td>Each organization's data is isolated — meetings, speaker map, Jira.</td><td><code>org_id</code> on every table; tenancy middleware.</td></tr>
-  <tr><td>Roles (RBAC)</td><td>admin · editor · viewer — who may create Jira issues.</td><td><code>memberships</code> table.</td></tr>
-  <tr><td>Calendar (metadata)</td><td>Import title/time/attendees from Google Calendar — transcript still pasted/uploaded.</td><td>Read-only Calendar API; pre-fill the meeting form.</td></tr>
-  <tr><td>Summary email</td><td>Auto-send the summary + meeting link to attendees.</td><td>SMTP or Resend/Cloudflare Email; an RTL HTML template.</td></tr>
-  <tr><td>Slack/Teams alert</td><td>Short message: N new tasks + link.</td><td>Incoming webhook.</td></tr>
+  <tr><th>قابلیت</th><th>توضیح</th><th>فنی</th></tr>
+  <tr><td>احراز هویت</td><td>ورود با ایمیل/رمز یا SSO سازمانی.</td><td>JWT session؛ یا OIDC (Keycloak / Google Workspace).</td></tr>
+  <tr><td>فضای کار (workspace)</td><td>داده‌ی هر سازمان جدا — جلسات، نقشه speaker، Jira.</td><td><code>org_id</code> روی همه‌ی جداول؛ middleware tenancy.</td></tr>
+  <tr><td>نقش‌ها (RBAC)</td><td>admin · editor · viewer — چه کسی Jira create کند.</td><td>جدول <code>memberships</code>.</td></tr>
+  <tr><td>تقویم (متادیتا)</td><td>import عنوان/زمان/شرکت‌کنندگان از Google Calendar — transcript همچنان paste/upload.</td><td>Calendar API read-only؛ پیش‌پرکردن فرم جلسه.</td></tr>
+  <tr><td>ایمیل خلاصه</td><td>ارسال خودکار خلاصه + لینک جلسه به شرکت‌کنندگان.</td><td>SMTP یا Resend/Cloudflare Email؛ قالب HTML RTL.</td></tr>
+  <tr><td>اعلان Slack/Teams</td><td>پیام کوتاه: N تسک جدید + لینک.</td><td>Incoming webhook.</td></tr>
 </table>
 
-<h2 id="s5">5. Sprint 5 — Scale, Quality &amp; Deployment</h2>
-<p><strong>Goal:</strong> ready for an organizational demo and production monitoring.</p>
+<h2 id="s5">۵. اسپرینت ۵ — مقیاس، کیفیت و استقرار</h2>
+<p><strong>هدف:</strong> آماده برای دموی سازمانی و پایش در production.</p>
 <table>
-  <tr><th>Capability</th><th>Description</th><th>Technical</th></tr>
-  <tr><td>PostgreSQL</td><td>Replace SQLite for multiple workers and backups.</td><td>SQLAlchemy + Alembic migration from the current schema.</td></tr>
-  <tr><td>Vector at scale</td><td>Thousands of chunks without slowdown.</td><td>pgvector or Chroma Cloud; a retention policy.</td></tr>
-  <tr><td>Ingest queue</td><td>Analyze long meetings in the background.</td><td>Redis + worker (Celery / ARQ); UI status polling.</td></tr>
-  <tr><td>Observability</td><td>Track Gemini latency and Jira errors.</td><td>OpenTelemetry + structured logs; a dashboard.</td></tr>
-  <tr><td>Deployment</td><td>Docker Compose; optional Cloud Run / VPS.</td><td>frontend + API + Postgres in one compose file.</td></tr>
-  <tr><td>Eval &amp; prompts</td><td>A golden-transcript set; quality regression on summaries.</td><td>pytest + an LLM-judge score or a human rubric.</td></tr>
-  <tr><td>Rate limiting</td><td>Prevent API abuse.</td><td>Per-org rate limit; embedding cache.</td></tr>
+  <tr><th>قابلیت</th><th>توضیح</th><th>فنی</th></tr>
+  <tr><td>PostgreSQL</td><td>جایگزین SQLite برای چند worker و backup.</td><td>مهاجرت SQLAlchemy + Alembic از schema فعلی.</td></tr>
+  <tr><td>Vector در مقیاس</td><td>هزاران chunk بدون کندی.</td><td>pgvector یا Chroma Cloud؛ retention policy.</td></tr>
+  <tr><td>صف ingest</td><td>تحلیل جلسه‌ی طولانی در background.</td><td>Redis + worker (Celery / ARQ)؛ polling وضعیت در UI.</td></tr>
+  <tr><td>Observability</td><td>ردیابی latency Gemini و خطای Jira.</td><td>OpenTelemetry + log ساختاریافته؛ یک dashboard.</td></tr>
+  <tr><td>استقرار</td><td>Docker Compose؛ اختیاری Cloud Run / VPS.</td><td>frontend + API + Postgres در یک compose.</td></tr>
+  <tr><td>eval و prompt</td><td>مجموعه‌ی golden transcript؛ regression کیفیت خلاصه.</td><td>pytest + امتیاز LLM-judge یا rubric انسانی.</td></tr>
+  <tr><td>محدودیت نرخ</td><td>جلوگیری از سوءاستفاده از API.</td><td>rate limit per org؛ cache embedding.</td></tr>
 </table>
 
-<h2 id="s6">6. Sprint 6+ — Intelligent Organizational Product</h2>
-<p><strong>Goal:</strong> competitive differentiation — beyond "summary + Jira."</p>
+<h2 id="s6">۶. اسپرینت ۶+ — محصول هوشمند سازمانی</h2>
+<p><strong>هدف:</strong> تمایز رقابتی — فراتر از «خلاصه + Jira».</p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart LR
-    subgraph agents ["Proposed agents"]
+    subgraph agents ["عامل‌های پیشنهادی"]
         A1["analysis_agent"]
         A2["rag_agent"]
         A3["jira_agent"]
-        A4["facilitation_agent<br/>facilitator guide"]
-        A5["alignment_agent<br/>SOW / contract"]
-        A6["sentiment_agent<br/>speaker tone"]
+        A4["facilitation_agent<br/>راهنمای برگزارکننده"]
+        A5["alignment_agent<br/>SOW / قرارداد"]
+        A6["sentiment_agent<br/>لحن گویندگان"]
         A7["review_agent"]
         O["orchestrator"]
     end
@@ -183,40 +186,40 @@ flowchart LR
 </pre>
 </div>
 <table>
-  <tr><th>Idea</th><th>Value</th></tr>
-  <tr><td>Decision tracking</td><td>Follow decisions across meetings — "was decision X carried out?"</td></tr>
-  <tr><td>Action-item dashboard</td><td>All open tasks from all meetings, filtered by assignee.</td></tr>
-  <tr><td>Meeting templates</td><td>Prompts specialized for stand-up / retro / planning.</td></tr>
-  <tr><td>Participation analysis</td><td>Each speaker's share of talk time; warn on one-sided meetings.</td></tr>
-  <tr><td>Decision conflict</td><td>An agent that compares a new meeting against past decisions.</td></tr>
-  <tr><td>Follow-up suggestion</td><td>Auto-draft the next agenda from open tasks.</td></tr>
-  <tr><td>Confluence / Notion</td><td>Publish minutes to the organization's wiki.</td></tr>
-  <tr><td>Analysis versioning</td><td>Human edits to a summary; re-run only part of the pipeline.</td></tr>
-  <tr><td>Privacy</td><td>PII masking · retention · GDPR export.</td></tr>
-  <tr><td>On-prem</td><td>In-network deployment; optional self-hosted model.</td></tr>
+  <tr><th>ایده</th><th>ارزش</th></tr>
+  <tr><td>ردیابی تصمیمات</td><td>پیگیری تصمیمات بین جلسات — «آیا تصمیم X اجرا شد؟»</td></tr>
+  <tr><td>داشبورد action items</td><td>همه‌ی تسک‌های باز از همه‌ی جلسات، با فیلتر assignee.</td></tr>
+  <tr><td>قالب جلسه</td><td>prompt مخصوص standup / retro / planning.</td></tr>
+  <tr><td>تحلیل مشارکت</td><td>نسبت صحبت هر speaker؛ هشدار جلسه‌ی یک‌طرفه.</td></tr>
+  <tr><td>تعارض تصمیم</td><td>یک عامل که جلسه‌ی جدید را با تصمیمات قبلی مقایسه می‌کند.</td></tr>
+  <tr><td>پیشنهاد follow-up</td><td>تهیه‌ی خودکار دستور کار بعدی از تسک‌های باز.</td></tr>
+  <tr><td>Confluence / Notion</td><td>انتشار صورتجلسه در wiki سازمان.</td></tr>
+  <tr><td>نسخه‌گذاری تحلیل</td><td>ویرایش انسانی روی خلاصه؛ re-run فقط بخشی از خط لوله.</td></tr>
+  <tr><td>حریم خصوصی</td><td>ماسک PII · retention · export برای GDPR.</td></tr>
+  <tr><td>on-prem</td><td>استقرار داخل شبکه؛ مدل self-hosted اختیاری.</td></tr>
 </table>
 
-<h2 id="adv">7. Advanced Capabilities (Differentiators)</h2>
+<h2 id="adv">۷. قابلیت‌های پیشرفته (متمایزکننده‌ها)</h2>
 <p>
-  Three capabilities turn the assistant from a note-taker into a meeting-intelligence product. Each adds a
-  new agent and, where relevant, a new input.
+  سه قابلیت، دستیار را از یک یادداشت‌بردار به یک محصول هوش‌جلسه (meeting intelligence) تبدیل می‌کنند.
+  هر کدام یک عامل جدید و در صورت لزوم یک ورودی جدید می‌افزایند.
 </p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart TB
-    subgraph input ["New inputs"]
-        T["Meeting transcript"]
-        D["Documents: SOW · contract · PDF"]
+    subgraph input ["ورودی‌های جدید"]
+        T["Transcript جلسه"]
+        D["اسناد: SOW · قرارداد · PDF"]
     end
-    subgraph agents ["Proposed agents"]
-        F["facilitation_agent<br/>facilitator guide"]
-        A["alignment_agent<br/>scope alignment"]
-        S["sentiment_agent<br/>speaker tone"]
+    subgraph agents ["عامل‌های پیشنهادی"]
+        F["facilitation_agent<br/>راهنمای برگزارکننده"]
+        A["alignment_agent<br/>هم‌راستایی با scope"]
+        S["sentiment_agent<br/>تحلیل لحن گویندگان"]
     end
-    subgraph output ["Organizational output"]
-        G["Better-meeting checklist"]
-        R["In-scope / out-of-scope report"]
-        M["Sentiment map · risk flags"]
+    subgraph output ["خروجی برای سازمان"]
+        G["چک‌لیست جلسه بهتر"]
+        R["گزارش in-scope / out-of-scope"]
+        M["نقشه احساسات · هشدار ریسک"]
     end
     T --> F & S
     T --> A
@@ -227,81 +230,81 @@ flowchart TB
 </pre>
 </div>
 
-<h3 id="adv-fac">7.1 Facilitator Guide <em>(implemented)</em></h3>
+<h3 id="adv-fac">۷.۱ راهنمای برگزارکننده <em>(پیاده‌سازی شده)</em></h3>
 <p>
-  After each meeting the system gives the <strong>facilitator</strong> concrete, coaching-style advice:
-  what went well, where time was wasted, and how to run the next meeting shorter and more effectively.
+  پس از تحلیل هر جلسه، سامانه به <strong>برگزارکننده (facilitator)</strong> پیشنهاد عملی و مربی‌گونه
+  می‌دهد: چه چیزی خوب بود، کجا وقت هدر رفت، و جلسه‌ی بعدی چطور کوتاه‌تر و مؤثرتر برگزار شود.
 </p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 sequenceDiagram
-    participant O as Facilitator
+    participant O as برگزارکننده
     participant UI as Astro
     participant API as FastAPI
     participant FA as facilitation_agent
-    participant ST as participation stats
+    participant ST as آمار مشارکت
 
-    O->>UI: meeting ends · ingest
-    API->>ST: speaker stats · duration · #decisions/#tasks
-    API->>FA: transcript + stats + meeting type
+    O->>UI: پایان جلسه · ingest
+    API->>ST: speaker stats · مدت · تعداد تصمیم/تسک
+    API->>FA: transcript + stats + نوع جلسه
     FA-->>UI: FacilitationReport
-    UI-->>O: guidance + next-meeting checklist
+    UI-->>O: راهنمای فارسی + چک‌لیست جلسه بعد
 </pre>
 </div>
-<h4>Manual checklist (usable today, no AI)</h4>
+<h4>چک‌لیست دستی (امروز — بدون AI)</h4>
 <div class="guide">
-  <p><strong>Before the meeting</strong></p>
+  <p><strong>قبل از جلسه</strong></p>
   <ul class="checklist">
-    <li>State a one-line goal and the expected output (decision / task / information).</li>
-    <li>Send an agenda with a rough timebox per item.</li>
-    <li>Invite only the necessary people; make each person's role clear.</li>
-    <li>Make reference documents (SOW, contract) available in advance.</li>
+    <li>هدف یک‌خطی و خروجی مورد انتظار (تصمیم / تسک / اطلاع‌رسانی) مشخص باشد.</li>
+    <li>دستور کار با زمان تقریبی هر بند (timebox) ارسال شود.</li>
+    <li>فقط افراد ضروری دعوت شوند — نقش هر نفر روشن باشد.</li>
+    <li>اسناد مرجع (SOW، قرارداد) از قبل در دسترس باشد.</li>
   </ul>
-  <p><strong>During the meeting</strong></p>
+  <p><strong>حین جلسه</strong></p>
   <ul class="checklist">
-    <li>State decisions explicitly: "we decided that…" with an owner.</li>
-    <li>Send off-topic threads to a "parking lot."</li>
-    <li>Give a 30-second progress recap every 15–20 minutes.</li>
+    <li>تصمیمات را با جمله‌ی «تصمیم گرفتیم که…» و مسئول اعلام کنید.</li>
+    <li>بحث‌های off-topic را به «پارکینگ‌لات» بسپارید.</li>
+    <li>هر ۱۵ تا ۲۰ دقیقه یک خلاصه‌ی ۳۰ ثانیه‌ای از پیشرفت بدهید.</li>
   </ul>
-  <p><strong>After the meeting</strong></p>
+  <p><strong>بعد از جلسه</strong></p>
   <ul class="checklist">
-    <li>Publish the summary + tasks within 24 hours.</li>
-    <li>Schedule a follow-up only if there is an open task.</li>
+    <li>خلاصه + تسک‌ها ظرف ۲۴ ساعت منتشر شود.</li>
+    <li>جلسه‌ی follow-up فقط در صورت وجود تسک باز برنامه‌ریزی شود.</li>
   </ul>
 </div>
-<h4>FacilitationReport output</h4>
+<h4>خروجی FacilitationReport</h4>
 <table>
-  <tr><th>Field</th><th>Description</th></tr>
-  <tr><td><code>what_went_well</code></td><td>2–3 positives (e.g. clear decisions, balanced participation).</td></tr>
-  <tr><td><code>improvements</code></td><td>Specific suggestions (e.g. "section X took 40% of the time with no decision").</td></tr>
-  <tr><td><code>next_meeting_agenda</code></td><td>A draft agenda for the next meeting, from open tasks.</td></tr>
-  <tr><td><code>timebox_suggestion</code></td><td>A shorter duration or a different format (e.g. async update).</td></tr>
-  <tr><td><code>coaching_summary</code></td><td>A short, encouraging summary for the facilitator.</td></tr>
-  <tr><td><code>facilitator_score</code></td><td>An optional 1–5 score against a rubric.</td></tr>
+  <tr><th>فیلد</th><th>توضیح</th></tr>
+  <tr><td><code>what_went_well</code></td><td>۲ تا ۳ نکته‌ی مثبت (مثلاً تصمیمات شفاف، مشارکت متعادل).</td></tr>
+  <tr><td><code>improvements</code></td><td>پیشنهاد مشخص (مثلاً «بخش X چهل‌درصد زمان را گرفت بدون تصمیم»).</td></tr>
+  <tr><td><code>next_meeting_agenda</code></td><td>پیش‌نویس دستور کار جلسه‌ی بعد از روی تسک‌های باز.</td></tr>
+  <tr><td><code>timebox_suggestion</code></td><td>پیشنهاد مدت کوتاه‌تر یا قالب متفاوت (مثلاً async update).</td></tr>
+  <tr><td><code>coaching_summary</code></td><td>خلاصه‌ی کوتاه و تشویقی برای برگزارکننده.</td></tr>
+  <tr><td><code>facilitator_score</code></td><td>امتیاز اختیاری ۱ تا ۵ بر اساس rubric.</td></tr>
 </table>
-<p><strong>API:</strong> <code>GET /api/meetings/{id}/facilitation</code> — implemented, with a "Facilitator Guide" tab in the UI.</p>
+<p><strong>API:</strong> <code dir="ltr">GET /api/meetings/{id}/facilitation</code> — پیاده‌سازی شده، با تب «راهنمای جلسه» در UI.</p>
 
-<h3 id="adv-align">7.2 SOW / Contract Alignment <em>(planned)</em></h3>
+<h3 id="adv-align">۷.۲ هم‌راستایی SOW / قرارداد <em>(برنامه‌ریزی‌شده)</em></h3>
 <p>
-  An organization can upload a <strong>Statement of Work</strong>, contract, or RFP. After each meeting,
-  <code>alignment_agent</code> compares the meeting's decisions and commitments against the document's
-  clauses and labels each as <strong>in-scope</strong>, <strong>out-of-scope</strong>, or
-  <strong>needs legal/manager approval</strong>.
+  سازمان می‌تواند <strong>Statement of Work</strong>، قرارداد، یا RFP را آپلود کند. پس از هر جلسه،
+  <code>alignment_agent</code> تصمیمات و تعهدات جلسه را با بندهای سند مقایسه می‌کند و هر مورد را
+  <strong>in-scope</strong>، <strong>out-of-scope</strong>، یا <strong>نیازمند تأیید حقوقی/مدیر</strong>
+  برچسب می‌زند.
 </p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart LR
-    subgraph docs ["Document store"]
-        UP["Upload PDF/DOCX"]
+    subgraph docs ["ذخیره اسناد"]
+        UP["آپلود PDF/DOCX"]
         PAR["parse + chunk"]
         EMB["embed → Chroma<br/>collection: org_docs"]
     end
-    subgraph meeting ["Meeting"]
-        DEC["decisions + tasks<br/>from analysis_agent"]
+    subgraph meeting ["جلسه"]
+        DEC["decisions + tasks<br/>از analysis_agent"]
     end
     subgraph align ["alignment_agent"]
-        RET["retrieve relevant clauses"]
-        CMP["semantic comparison"]
+        RET["retrieve بندهای مرتبط"]
+        CMP["مقایسه semantic"]
         REP["AlignmentReport"]
     end
     UP --> PAR --> EMB
@@ -310,30 +313,29 @@ flowchart LR
     RET --> CMP --> REP
 </pre>
 </div>
-<h4>Proposed data model</h4>
+<h4>مدل داده‌ی پیشنهادی</h4>
 <table>
-  <tr><th>Entity</th><th>Fields</th></tr>
+  <tr><th>موجودیت</th><th>فیلدها</th></tr>
   <tr><td><code>OrgDocument</code></td><td><code>id</code>, <code>title</code>, <code>type</code> (sow|contract|rfp), <code>project_key</code>, <code>uploaded_at</code></td></tr>
   <tr><td><code>AlignmentFinding</code></td><td><code>meeting_decision</code>, <code>doc_excerpt</code>, <code>status</code> (aligned|out_of_scope|unclear), <code>confidence</code>, <code>doc_id</code></td></tr>
-  <tr><td><code>AlignmentReport</code></td><td>A list of findings + a summary for the project manager.</td></tr>
+  <tr><td><code>AlignmentReport</code></td><td>لیست findings + خلاصه‌ی فارسی برای مدیر پروژه.</td></tr>
 </table>
-<h4>Proposed API</h4>
+<h4>API پیشنهادی</h4>
 <table>
-  <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
-  <tr><td>POST</td><td><code>/api/documents</code></td><td>Upload an SOW/contract · index in Chroma.</td></tr>
-  <tr><td>GET</td><td><code>/api/documents</code></td><td>List a project's documents.</td></tr>
-  <tr><td>POST</td><td><code>/api/meetings/{id}/alignment</code></td><td>Run <code>alignment_agent</code> · comparison report.</td></tr>
+  <tr><th>Method</th><th>Path</th><th>کار</th></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/documents</td><td>آپلود SOW/قرارداد · index در Chroma.</td></tr>
+  <tr><td dir="ltr">GET</td><td dir="ltr">/api/documents</td><td>لیست اسناد پروژه.</td></tr>
+  <tr><td dir="ltr">POST</td><td dir="ltr">/api/meetings/{id}/alignment</td><td>اجرای <code>alignment_agent</code> · گزارش مقایسه.</td></tr>
 </table>
 <div class="warn">
-  <strong>Product caveat:</strong> AI output does not replace legal counsel — for binding contracts, human
-  approval is mandatory. The UI must show a clear disclaimer.
+  <strong>هشدار محصول:</strong> خروجی AI جایگزین مشاور حقوقی نیست — برای قراردادهای binding، تأیید انسان
+  الزامی است. UI باید یک disclaimer واضح نشان دهد.
 </div>
 
-<h3 id="adv-sent">7.3 Sentiment Analysis <em>(planned)</em></h3>
+<h3 id="adv-sent">۷.۳ تحلیل احساسات (Sentiment) <em>(برنامه‌ریزی‌شده)</em></h3>
 <p>
-  Over the <strong>transcript text</strong> (not raw audio), for each speaker and each phase of the
-  meeting: overall tone (positive / neutral / negative), <strong>incongruity</strong> (e.g. positive words
-  hiding a concern), and the trend of sentiment over the meeting.
+  روی <strong>متن transcript</strong> (نه صوت خام)، برای هر گوینده و هر بخش جلسه: لحن کلی (مثبت / خنثی /
+  منفی)، <strong>ناهماهنگی</strong> (مثلاً کلمات مثبت با نگرانی پنهان)، و روند احساس در طول جلسه.
 </p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
@@ -343,7 +345,7 @@ flowchart TB
     SA["sentiment_agent<br/>Gemini structured output"]
     OUT["SpeakerSentimentProfile"]
     TR --> CH --> SA --> OUT
-    subgraph metrics ["Metrics"]
+    subgraph metrics ["متریک‌ها"]
         M1["polarity: -1..+1"]
         M2["engagement: low/med/high"]
         M3["concern_flags[]"]
@@ -352,76 +354,75 @@ flowchart TB
     OUT --> metrics
 </pre>
 </div>
-<h4>SpeakerSentimentProfile output</h4>
+<h4>خروجی SpeakerSentimentProfile</h4>
 <table>
-  <tr><th>Field</th><th>Meaning</th></tr>
-  <tr><td><code>speaker</code></td><td>Speaker name from the transcript.</td></tr>
+  <tr><th>فیلد</th><th>معنی</th></tr>
+  <tr><td><code>speaker</code></td><td>نام گوینده از transcript.</td></tr>
   <tr><td><code>overall_tone</code></td><td>positive | neutral | negative | mixed.</td></tr>
-  <tr><td><code>polarity_score</code></td><td>A number from −1 to +1.</td></tr>
-  <tr><td><code>concern_phrases</code></td><td>Short quotes that hint at concern or disagreement.</td></tr>
-  <tr><td><code>hidden_dissatisfaction</code></td><td>bool + explanation (e.g. "verbal agreement but stress on risk").</td></tr>
-  <tr><td><code>timeline</code></td><td>Tone change across the start / middle / end of the meeting.</td></tr>
+  <tr><td><code>polarity_score</code></td><td>عددی از −۱ تا +۱.</td></tr>
+  <tr><td><code>concern_phrases</code></td><td>نقل‌قول‌های کوتاهی که نگرانی یا مخالفت احتمالی نشان می‌دهند.</td></tr>
+  <tr><td><code>hidden_dissatisfaction</code></td><td>bool + توضیح (مثلاً «موافقت ظاهری اما تأکید بر ریسک»).</td></tr>
+  <tr><td><code>timeline</code></td><td>تغییر لحن در ابتدا / میانه / پایان جلسه.</td></tr>
 </table>
-<p><strong>Proposed API:</strong> <code>GET /api/meetings/{id}/sentiment</code> — a new tab beside summary/tasks/RAG.</p>
+<p><strong>API پیشنهادی:</strong> <code dir="ltr">GET /api/meetings/{id}/sentiment</code> — یک تب جدید کنار خلاصه/تسک/RAG.</p>
 <div class="warn">
-  <strong>Ethics &amp; privacy:</strong> sentiment analysis for team management is sensitive. Only an
-  admin/facilitator should see it; it must be organizational opt-in, with no negative labels in public
-  reports. Framing in the UI: "a signal for a follow-up conversation," never "a personality judgment."
+  <strong>اخلاق و حریم خصوصی:</strong> تحلیل sentiment برای مدیریت تیم حساس است. فقط admin/facilitator
+  باید آن را ببیند؛ باید opt-in سازمانی باشد، بدون برچسب‌گذاری منفی در گزارش‌های عمومی. چارچوب در UI:
+  «سیگنالی برای گفت‌وگوی follow-up»، نه «قضاوت شخصیتی».
 </div>
 
-<h2 id="mlops">8. MLOps &amp; the Quality Loop</h2>
+<h2 id="mlops">۸. MLOps و چرخه‌ی کیفیت</h2>
 <p>
-  The MVP does not retrain a model — it consumes a hosted LLM. The operational concern, therefore, is not
-  model training but <strong>quality assurance of prompts and outputs over time</strong>, which is exactly
-  where an AI product tends to regress silently.
+  MVP مدلی را بازآموزی نمی‌کند — از یک LLM میزبانی‌شده استفاده می‌کند. بنابراین دغدغه‌ی عملیاتی، آموزش
+  مدل نیست بلکه <strong>تضمین کیفیت promptها و خروجی‌ها در طول زمان</strong> است؛ دقیقاً همان‌جایی که یک
+  محصول AI به‌آرامی و بدون سروصدا دچار افت می‌شود.
 </p>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart LR
-    D["New data /<br/>golden transcripts"] --> T["Prompt tuning /<br/>eval"]
-    T --> DEP["Deploy"]
-    DEP --> MON["Monitor quality"]
+    D["داده جدید /<br/>golden transcripts"] --> T["prompt tuning /<br/>eval"]
+    T --> DEP["استقرار"]
+    DEP --> MON["پایش کیفیت"]
     MON --> D
 </pre>
 </div>
 <ul>
-  <li><strong>Golden set:</strong> a curated set of transcripts with reference summaries and expected tasks.</li>
-  <li><strong>Automated eval:</strong> score each new prompt/model version against the golden set with an
-      LLM-judge and/or a human rubric, run as part of CI.</li>
-  <li><strong>Prompt versioning:</strong> treat prompts as versioned artifacts so a regression can be
-      traced to a specific change.</li>
-  <li><strong>Drift monitoring:</strong> watch summary quality, RAG citation accuracy, and Jira conversion
-      over time, and alert on degradation.</li>
+  <li><strong>مجموعه‌ی golden:</strong> مجموعه‌ای منتخب از transcriptها با خلاصه‌ی مرجع و تسک‌های مورد انتظار.</li>
+  <li><strong>eval خودکار:</strong> امتیازدهی هر نسخه‌ی جدید prompt/مدل در برابر مجموعه‌ی golden با
+      LLM-judge و/یا rubric انسانی، به‌عنوان بخشی از CI.</li>
+  <li><strong>نسخه‌گذاری prompt:</strong> با promptها مثل artifactهای نسخه‌دار رفتار شود تا یک regression
+      را بتوان به یک تغییر مشخص ردیابی کرد.</li>
+  <li><strong>پایش drift:</strong> رصد کیفیت خلاصه، دقت citation در RAG، و نرخ تبدیل Jira در طول زمان، و
+      هشدار در صورت افت.</li>
 </ul>
 <p>
-  This is scheduled with Sprint 5 (Scale, Quality &amp; Deployment) and is the honest counterpart to the
-  AIOps/MLOps theory: the lifecycle the product would adopt as it matures, scoped realistically rather
-  than over-promised in the MVP.
+  این کار با اسپرینت ۵ (مقیاس، کیفیت و استقرار) زمان‌بندی شده و همتای صادقانه‌ی نظریه‌ی AIOps/MLOps است:
+  چرخه‌ی عمری که محصول با بلوغ خود اتخاذ می‌کند، به‌صورت واقع‌بینانه و بدون وعده‌ی اغراق‌آمیز در MVP.
 </p>
 
-<h2 id="priorities">9. Prioritization</h2>
+<h2 id="priorities">۹. اولویت‌بندی</h2>
 <table>
-  <tr><th>Priority</th><th>Item</th><th>Rationale</th></tr>
-  <tr><td>P0</td><td>Multi-meeting RAG + FTS archive</td><td>Highest value over the MVP.</td></tr>
-  <tr><td>P0</td><td>Jira assignee mapping</td><td>A real pain point for operational teams.</td></tr>
-  <tr><td>P1</td><td>Auth + workspace</td><td>Prerequisite for an organizational customer.</td></tr>
-  <tr><td>P1</td><td>Edit-before-create for Jira</td><td>User trust in AI output.</td></tr>
-  <tr><td>P1</td><td>Facilitator guide (done) + deeper coaching</td><td>Immediate differentiation, light infrastructure.</td></tr>
-  <tr><td>P1</td><td>SOW/contract alignment</td><td>Value for PMs and fixed-scope contracts.</td></tr>
-  <tr><td>P2</td><td>PostgreSQL + queue</td><td>When traffic exceeds demo scale.</td></tr>
-  <tr><td>P2</td><td>Calendar metadata + summary email</td><td>Reduces data-entry friction.</td></tr>
-  <tr><td>P2</td><td>Sentiment analysis</td><td>Only after RBAC and ethical opt-in.</td></tr>
-  <tr><td>P3</td><td>Multi-agent · Confluence</td><td>Long-term differentiation.</td></tr>
+  <tr><th>اولویت</th><th>مورد</th><th>دلیل</th></tr>
+  <tr><td>P0</td><td>RAG چندجلسه + آرشیو FTS</td><td>بیشترین ارزش نسبت به MVP.</td></tr>
+  <tr><td>P0</td><td>نگاشت assignee در Jira</td><td>درد واقعی تیم‌های عملیاتی.</td></tr>
+  <tr><td>P1</td><td>Auth + workspace</td><td>پیش‌نیاز مشتری سازمانی.</td></tr>
+  <tr><td>P1</td><td>ویرایش قبل از create در Jira</td><td>اعتماد کاربر به خروجی AI.</td></tr>
+  <tr><td>P1</td><td>راهنمای برگزارکننده (انجام‌شده) + مربی‌گری عمیق‌تر</td><td>تمایز فوری با infra سبک.</td></tr>
+  <tr><td>P1</td><td>هم‌راستایی SOW/قرارداد</td><td>ارزش برای PM و قراردادهای fixed-scope.</td></tr>
+  <tr><td>P2</td><td>PostgreSQL + queue</td><td>وقتی ترافیک از حد دمو فراتر رود.</td></tr>
+  <tr><td>P2</td><td>متادیتای تقویم + ایمیل خلاصه</td><td>کاهش اصطکاک ورود داده.</td></tr>
+  <tr><td>P2</td><td>تحلیل sentiment</td><td>فقط پس از RBAC و opt-in اخلاقی.</td></tr>
+  <tr><td>P3</td><td>multi-agent · Confluence</td><td>تمایز بلندمدت.</td></tr>
 </table>
 
-<h2 id="deps">10. Technical Dependencies</h2>
+<h2 id="deps">۱۰. وابستگی‌های فنی</h2>
 <div class="mermaid-wrap">
 <pre class="mermaid">
 flowchart TD
     MVP["Sprint 1 MVP"]
     M["SQLite + Chroma"]
-    R2["Multi-meeting RAG"]
-    J3["Jira assignee map"]
+    R2["RAG چندجلسه"]
+    J3["نگاشت assignee Jira"]
     A4["Auth / org"]
     P5["Postgres + deploy"]
     MVP --> M
@@ -433,34 +434,31 @@ flowchart TD
 </pre>
 </div>
 <p>
-  The dependency graph explains the sprint ordering: the storage foundation enables both multi-meeting RAG
-  and assignee mapping; both of those motivate multi-tenancy (auth/org); and a real tenant load is what
-  finally justifies PostgreSQL and a production deployment.
+  گراف وابستگی، ترتیب اسپرینت‌ها را توضیح می‌دهد: پایه‌ی ذخیره‌سازی هم RAG چندجلسه و هم نگاشت assignee را
+  ممکن می‌کند؛ هر دوی این‌ها چندمستأجری (auth/org) را برمی‌انگیزند؛ و بار واقعی مستأجران است که سرانجام
+  PostgreSQL و یک استقرار production را توجیه می‌کند.
 </p>
 
-<h2 id="research">11. Longer-Horizon Research Ideas</h2>
-<p>
-  Beyond the planned product work, several directions would make strong follow-on research or thesis
-  extensions:
-</p>
+<h2 id="research">۱۱. ایده‌های افق‌بلندتر پژوهشی</h2>
+<p>فراتر از کار محصولیِ برنامه‌ریزی‌شده، چند مسیر می‌توانند پایه‌ی پژوهش یا توسعه‌ی پایان‌نامه باشند:</p>
 <ul>
-  <li><strong>Cross-meeting decision graphs.</strong> Model decisions as nodes and detect contradictions,
-      reversals, and unfulfilled commitments across an organization's meeting history.</li>
-  <li><strong>Multi-agent debate for summaries.</strong> Use a critic/reviewer agent to challenge the
-      first-pass summary, measuring whether adversarial review improves factual faithfulness.</li>
-  <li><strong>Semantic, speaker-aware chunking.</strong> Compare turn-based chunking against semantic and
-      speaker-aware chunking on retrieval accuracy for Persian transcripts.</li>
-  <li><strong>Faithfulness evaluation for Persian RAG.</strong> Build an evaluation harness for citation
-      accuracy and hallucination rate specific to low-resource-language meeting data.</li>
-  <li><strong>Privacy-preserving analysis.</strong> On-device or PII-masked pipelines so sensitive
-      meetings can be analyzed without leaving the organization's network.</li>
-  <li><strong>Human-in-the-loop quality.</strong> Capture human edits to summaries and tasks as a feedback
-      signal for prompt improvement and per-organization adaptation.</li>
+  <li><strong>گراف تصمیمات بین‌جلسه‌ای.</strong> مدل‌کردن تصمیمات به‌صورت گره و تشخیص تناقض، بازگشت، و
+      تعهدات اجرانشده در طول تاریخچه‌ی جلسات یک سازمان.</li>
+  <li><strong>مباحثه‌ی چندعامله برای خلاصه‌ها.</strong> استفاده از یک عامل منتقد/بازبین برای به‌چالش‌کشیدن
+      خلاصه‌ی نوبت اول، و سنجش اینکه آیا بازبینی خصمانه وفاداری واقعی را بهبود می‌دهد.</li>
+  <li><strong>Chunking معنایی و گوینده‌آگاه.</strong> مقایسه‌ی chunking مبتنی بر نوبت با chunking معنایی و
+      گوینده‌آگاه از نظر دقت بازیابی روی transcriptهای فارسی.</li>
+  <li><strong>ارزیابی وفاداری برای RAG فارسی.</strong> ساخت یک harness ارزیابی برای دقت citation و نرخ
+      hallucination، ویژه‌ی داده‌ی جلساتِ زبانِ کم‌منبع.</li>
+  <li><strong>تحلیل حافظ حریم خصوصی.</strong> خط لوله‌های on-device یا با PII ماسک‌شده تا جلسات حساس بدون
+      خروج از شبکه‌ی سازمان تحلیل شوند.</li>
+  <li><strong>کیفیت با انسان در حلقه.</strong> ثبت ویرایش‌های انسانی روی خلاصه و تسک به‌عنوان سیگنال بازخورد
+      برای بهبود prompt و انطباق per-organization.</li>
 </ul>
 
 <p class="meta">
-  Related: <a href="01-project-overview.html">Project Overview &amp; Vision</a> ·
-  <a href="02-implementation.html">Technical Implementation</a>.
+  مرتبط: <a href="01-project-overview.html">شرح پروژه و چشم‌انداز</a> ·
+  <a href="02-implementation.html">پیاده‌سازی فنی</a>.
 </p>
 
 </body>
