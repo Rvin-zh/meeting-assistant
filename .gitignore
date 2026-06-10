@@ -20,3 +20,19 @@ data/vectors/
 *.docx
 docs/node_modules/
 docs/.playwright/
+
+# Notebooks — caches, downloads, and build intermediates (keep .ipynb + .pdf)
+notebooks/**/.ipynb_checkpoints/
+notebooks/**/*.npy
+notebooks/**/embeddings/
+notebooks/**/data/
+notebooks/**/pretrained_models/
+notebooks/**/*-slides.html
+notebooks/**/render.mjs
+notebooks/**/_run_*.py
+notebooks/**/_build_*.py
+notebooks/_run_*.py
+notebooks/_build_*.py
+notebooks/presentation/
+notebooks/beats_src/
+notebooks/embeddings/
