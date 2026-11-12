@@ -2,6 +2,10 @@
 
 اپ دمو برای تحلیل جلسات فارسی: **متن یا صوت** → transcript → خلاصه، تسک، RAG، Jira.
 
+**[ فارسی ]** · [[ English Version ]](README.en.md)
+
+---
+
 **Meetings DB:** SQLite (`data/meetings.db`) — transcripts, summaries, tasks. Legacy JSON in `data/meetings/` migrates on first start.
 
 **Vector DB:** [ChromaDB](https://www.trychroma.com/) (embedded, local — `data/chroma/`).
@@ -59,3 +63,9 @@ chmod +x scripts/run-frontend.sh
 - Spec: `docs/superpowers/specs/2026-05-26-meeting-assistant-design.md`
 - **Voice:** آپلود/ضبط صوت → Gemini رونویسی → همان pipeline تحلیل (`POST /api/transcribe`)
 - PDF export: `./scripts/export-docs.sh` → `docs/pdf/` (سه PDF متناظر سه سند بالا)
+
+---
+
+## نویسنده
+- **توسعه‌دهنده:** [Rvin-zh](https://github.com/Rvin-zh)
+- **مخزن گیت‌هاب:** [https://github.com/Rvin-zh/meeting-assistant](https://github.com/Rvin-zh/meeting-assistant)
